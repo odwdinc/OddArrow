@@ -1,0 +1,18 @@
+name: OddArrow
+main: me.odwdinc.oddarrow.OddArrow
+version: 0.0.1
+description: A Odd plugin for Bukkit.
+commands:
+commands:
+  oa:
+    description: Set OddArrow Mode!!
+    usage: /oa <Rappad><Remote><Light><Replace><Create><Topsoil><Off>, /oa <Material>
+  boom:
+    description: Make OddArrow Go Boom!!
+    usage: boom
+  oar:
+    description: Pemove OddArrow Player :-(
+    usage: boom
+  listoa:
+    description: Pemove OddArrow Player :-(
+    usage: listoa
