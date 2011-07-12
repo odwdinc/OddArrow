@@ -351,7 +351,7 @@ public class OddArrow extends JavaPlugin{
 			thisArrow.remove();
 			break;	
 		case 3: //replace
-			ThisOddArrowbulder(ThisPlayer,thisArrow.getLocation().getBlock(),getArrowMaterial(ThisPlayer), 2);
+			ThisOddArrowbulder(ThisPlayer,thisArrow.getLocation(),getArrowMaterial(ThisPlayer), 2);
 			thisArrow.remove();
 			break;
 		case 4://crate
