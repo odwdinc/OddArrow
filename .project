@@ -3,6 +3,7 @@
 	<name>OddArrow</name>
 	<comment></comment>
 	<projects>
+		<project>Bukkit</project>
 	</projects>
 	<buildSpec>
 		<buildCommand>

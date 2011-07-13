@@ -273,6 +273,12 @@ public class OddArrow extends JavaPlugin{
 			arrowTestLocationHash.put(thisArrow, thisArrow.getLocation().getY());	
 		}else{
 			
+			switch (getPlayerMode((Player) thisArrow.getShooter())) {
+				case 7://[Arrow Rider]
+					thisArrow.setPassenger(thisArrow.getShooter());
+				break;
+			}
+			
 			//if (thisArrow.getWorld().getBlockAt(thisArrow.getLocation()).getType() == Material.AIR){
 			//	thisArrow.getWorld().getBlockAt(thisArrow.getLocation().add(0, 1, 0)).setType(Material.WOOL);
 			//}
@@ -340,7 +346,11 @@ public class OddArrow extends JavaPlugin{
 			thisArrow.getWorld().strikeLightning(thisArrow.getLocation());
 			thisArrow.remove();
 			break;
+		case 7://[Arrow Rider]
+			thisArrow.remove();
+			break;
 		}
+		
 
 	}
 
@@ -384,6 +394,14 @@ public class OddArrow extends JavaPlugin{
 							 }else if(args[0].equalsIgnoreCase("Topsoil")) {
 								 setPlayerMode(ThisPlayer, 5);
 								 ThisPlayer.sendMessage("[OddArrow] [Topsoil removal]");
+								 return true;
+							 }else if(args[0].equalsIgnoreCase("Lightning")) {
+								 setPlayerMode(ThisPlayer, 6);
+								 ThisPlayer.sendMessage("[OddArrow] [Lightning strike]");
+								 return true;
+							 }else if(args[0].equalsIgnoreCase("Rider")) {
+								 setPlayerMode(ThisPlayer, 7);
+								 ThisPlayer.sendMessage("[OddArrow] [Arrow Rider]");
 								 return true;
 							 }else if(args[0].equalsIgnoreCase("Off")) {
 								 setPlayerMode(ThisPlayer, -1);

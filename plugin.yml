@@ -6,7 +6,7 @@ commands:
 commands:
   oa:
     description: Set OddArrow Mode!!
-    usage: /oa <Rappad><Remote><Light><Replace><Create><Topsoil><Off>, /oa <Material>
+    usage: /oa <Rappad><Remote><Light><Replace><Create><Topsoil><Lightning><Rider><Off>, /oa <Material>
   boom:
     description: Make OddArrow Go Boom!!
     usage: boom
