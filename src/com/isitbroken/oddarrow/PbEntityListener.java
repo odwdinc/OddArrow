@@ -23,8 +23,8 @@ public class PbEntityListener extends PlayerListener {
 		if (plugin.isPlayer(event.getPlayer())){
 			if (event.getItem().getType() == Material.BOW){
 				if (event.getPlayer().getInventory().contains(Material.ARROW)){
-					Arrow arrow=event.getPlayer().shootArrow();
-					ArrayList<Arrow> temarrowlist = plugin.oddArrowListHash.get(event.getPlayer());
+					Arrow arrow = event.getPlayer().shootArrow();
+					ArrayList<Arrow> temarrowlist = plugin.getArrowList(event.getPlayer());
 					temarrowlist.add(arrow);
 					plugin.oddArrowListHash.put(event.getPlayer(), (ArrayList<Arrow>) temarrowlist);
 					plugin.lookforarrows(event.getPlayer());
