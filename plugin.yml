@@ -6,13 +6,10 @@ commands:
 commands:
   oa:
     description: Set OddArrow Mode!!
-    usage: /oa <Rappad><Remote><Light><Replace><Create><Topsoil><Lightning><Off>, /oa <Material>
+    usage: /oa <Rappad><Remote><Light><Replace><Create><Topsoil><Lightning><Off>, /oa <Replace><Create> <Material>
   boom:
     description: Make OddArrow Go Boom!!
-    usage: boom
+    usage: /boom
   oar:
     description: Pemove OddArrow Player :-(
-    usage: boom
-  listoa:
-    description: Pemove OddArrow Player :-(
-    usage: listoa
+    usage: /oar

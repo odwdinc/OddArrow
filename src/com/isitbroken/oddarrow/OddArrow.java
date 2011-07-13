@@ -380,9 +380,9 @@ public class OddArrow extends JavaPlugin{
 				return true;
 			}else if (commandLable.equalsIgnoreCase("oa")){
 				if (args.length == 1 ){
-					if(args[0].equalsIgnoreCase("Rappad")) {
+					if(args[0].equalsIgnoreCase("Rapid")) {
 						setPlayerMode(ThisPlayer, 0);
-						ThisPlayer.sendMessage("[OddArrow] [RappadFire]");
+						ThisPlayer.sendMessage("[OddArrow] [Rapid Fire]");
 						return true;
 					}else if(args[0].equalsIgnoreCase("Remote")) {
 						setPlayerMode(ThisPlayer, 1);
@@ -412,31 +412,34 @@ public class OddArrow extends JavaPlugin{
 						setPlayerMode(ThisPlayer, -1);
 						ThisPlayer.sendMessage("[OddArrow] [Off]");
 						return true;
-					}else if( getPlayerMode(ThisPlayer) == 3 || getPlayerMode(ThisPlayer) == 4) {
+					}		
+				}else if (args.length == 2 ){
+					
+					if( getPlayerMode(ThisPlayer) == 3 || getPlayerMode(ThisPlayer) == 4) {
 						Material ArrowMaterial;
 						try
 						{
-							ArrowMaterial = Material.getMaterial(Integer.parseInt(args[0]));
+							ArrowMaterial = Material.getMaterial(Integer.parseInt(args[1]));
 						}
 						catch(NumberFormatException nfe)
 						{
-							ArrowMaterial = Material.getMaterial(args[0]);
+							ArrowMaterial = Material.getMaterial(args[1]);
 						}
 						try{
 							sender.sendMessage("[OddArrow] [ArrowMaterial "+ArrowMaterial.toString()+"]");
 							setArrowMaterial(ThisPlayer,ArrowMaterial);
 							return true;
 						}catch(NullPointerException e){
-							ThisPlayer.sendMessage("[OddArrow] Could not Find "+args[0]);
+							ThisPlayer.sendMessage("[OddArrow] Could not Find "+args[1]);
 							return false;
-						}		
+						}
 					}
 				}else{
 					setPlayerMode(ThisPlayer,getPlayerMode(ThisPlayer)+1);
 
 					switch (getPlayerMode(ThisPlayer)) {
 					case 0:
-						ThisPlayer.sendMessage("[OddArrow] [RappadFire]");
+						ThisPlayer.sendMessage("[OddArrow] [Rapid Fire]");
 						break;
 					case 1:
 						ThisPlayer.sendMessage("[OddArrow] [Remote Explosions] type (/boom) to detonate.");

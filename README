@@ -1,0 +1,47 @@
+Rapid:
+	Command: /oa Rapid
+	Description: Rapid Fire arrows Explode on contact with none LivingEntity.
+
+Remote:
+	Command: /oa Remote
+	Description: Remote explode arrows. Explode With /boom Command.
+Light:
+	Command: /oa Light
+	Description: The block the arrow lands in will be set
+	
+Replace: Material
+	Command: /oa Replace
+	Description: Non air blocks will be Replace Where the arrow lands With set Material.
+		
+	Command: /oa Replace <Material>
+	Description: Sets the Material to use in Replace / Create  mode.
+	
+Create: Material
+	Command: /oa Create
+	Description: The Air/Lava/Water block the arrows is in on contact with Ground will be replaced with Material.
+		
+	Command: /oa Create <Material>
+	Description: Sets the Material to use in Replace / Create  mode.
+	
+Topsoil:
+	Command: /oa Topsoil
+	Description: arrows Explode Clearing just  Dirt/Sand/etc... leaving  stone untouched.
+	
+Lightning:
+	Command: /oa Lightning
+	Description: Strike Lightning where arrow lands on none LivingEntity.
+	
+Off:
+	Command: /oa Off
+	Description:  turn off OddArrows
+
+Remove:
+	Command: /oar
+	Description: Remove your player from OddArrows	
+	
+	Command: /boom
+	Description: Used for Remote explode arrows
+	
+[Permissions]	
+PermissionsEx
+- com.isitbroken.oddarrow.permission
