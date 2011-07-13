@@ -23,6 +23,9 @@ import org.bukkit.plugin.PluginDescriptionFile;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import ru.tehkode.permissions.PermissionManager;
+import ru.tehkode.permissions.bukkit.PermissionsEx;
+
 public class OddArrow extends JavaPlugin{
 	
 	public static OddArrow plugin;
@@ -47,7 +50,7 @@ public class OddArrow extends JavaPlugin{
 	
 	@Override
 	public void onEnable() {
-		PluginManager pm = getServer().getPluginManager();
+		PluginManager pm = getServer().getPluginManager();		
 		pm.registerEvent(Type.PLAYER_INTERACT, playerListener, Priority.Normal, this);
 		PluginDescriptionFile pdfFile = this.getDescription();
 		this.logger.info( pdfFile.getName() + " version " + pdfFile.getVersion() + " is Enabled");
@@ -274,9 +277,6 @@ public class OddArrow extends JavaPlugin{
 		}else{
 			
 			switch (getPlayerMode((Player) thisArrow.getShooter())) {
-				case 7://[Arrow Rider]
-					thisArrow.setPassenger(thisArrow.getShooter());
-				break;
 			}
 			
 			//if (thisArrow.getWorld().getBlockAt(thisArrow.getLocation()).getType() == Material.AIR){
@@ -346,11 +346,7 @@ public class OddArrow extends JavaPlugin{
 			thisArrow.getWorld().strikeLightning(thisArrow.getLocation());
 			thisArrow.remove();
 			break;
-		case 7://[Arrow Rider]
-			thisArrow.remove();
-			break;
 		}
-		
 
 	}
 
@@ -359,114 +355,124 @@ public class OddArrow extends JavaPlugin{
 
 	public boolean onCommand (CommandSender sender, Command cmd, String commandLable, String[] args){
 		
-		if (isPlayer((Player) sender)){
-			Player ThisPlayer = (Player) sender;
+		if(getServer().getPluginManager().isPluginEnabled("PermissionsEx")){
 			
-			if (commandLable.equalsIgnoreCase("Boom")){
-				setOffArrowExplosions(ThisPlayer);
-				return true;
-			}else if (commandLable.equalsIgnoreCase("oar")){
-				setIfPlayer(ThisPlayer,false);
-				sender.sendMessage("[OddArrow] Disabled.");
-				return true;
-			}else if (commandLable.equalsIgnoreCase("oa")){
-				if (args.length == 1 ){
-							 if(args[0].equalsIgnoreCase("Rappad")) {
-								 setPlayerMode(ThisPlayer, 0);
-								 ThisPlayer.sendMessage("[OddArrow] [RappadFire]");
-								 return true;
-							 }else if(args[0].equalsIgnoreCase("Remote")) {
-								 setPlayerMode(ThisPlayer, 1);
-								 ThisPlayer.sendMessage("[OddArrow] [Remote Explosions] type (/boom) to detonate.");
-								 return true;
-							 }else if(args[0].equalsIgnoreCase("Light")){
-								 setPlayerMode(ThisPlayer, 2);
-								 ThisPlayer.sendMessage("[OddArrow] [Create Light]");
-								 return true;
-							 }else if(args[0].equalsIgnoreCase("Replace")) {
-								 setPlayerMode(ThisPlayer, 3);
-								 ThisPlayer.sendMessage("[OddArrow] [Replace With" + getArrowMaterial(ThisPlayer) + "]");
-								 return true;
-							 }else if(args[0].equalsIgnoreCase("Create")) {
-								 setPlayerMode(ThisPlayer, 4);
-								 ThisPlayer.sendMessage("[OddArrow] [Create " + getArrowMaterial(ThisPlayer) + "]");
-								 return true;
-							 }else if(args[0].equalsIgnoreCase("Topsoil")) {
-								 setPlayerMode(ThisPlayer, 5);
-								 ThisPlayer.sendMessage("[OddArrow] [Topsoil removal]");
-								 return true;
-							 }else if(args[0].equalsIgnoreCase("Lightning")) {
-								 setPlayerMode(ThisPlayer, 6);
-								 ThisPlayer.sendMessage("[OddArrow] [Lightning strike]");
-								 return true;
-							 }else if(args[0].equalsIgnoreCase("Rider")) {
-								 setPlayerMode(ThisPlayer, 7);
-								 ThisPlayer.sendMessage("[OddArrow] [Arrow Rider]");
-								 return true;
-							 }else if(args[0].equalsIgnoreCase("Off")) {
-								 setPlayerMode(ThisPlayer, -1);
-								 ThisPlayer.sendMessage("[OddArrow] [Off]");
-								 return true;
-							 }else if( getPlayerMode(ThisPlayer) == 3 || getPlayerMode(ThisPlayer) == 4) {
-								 Material ArrowMaterial;
-								 try
-								 {
-									ArrowMaterial = Material.getMaterial(Integer.parseInt(args[0]));
-								 }
-								 catch(NumberFormatException nfe)
-								 {
-									 ArrowMaterial = Material.getMaterial(args[0]);
-								 }
-								 try{
-									 sender.sendMessage("[OddArrow] [ArrowMaterial "+ArrowMaterial.toString()+"]");
-									 setArrowMaterial(ThisPlayer,ArrowMaterial);
-									 return true;
-								 }catch(NullPointerException e){
-									 ThisPlayer.sendMessage("[OddArrow] Could not Find "+args[0]);
-									 return false;
-								 }		
-							 }
-				}else{
-					setPlayerMode(ThisPlayer,getPlayerMode(ThisPlayer)+1);
-					
-					switch (getPlayerMode(ThisPlayer)) {
-						case 0:
-							ThisPlayer.sendMessage("[OddArrow] [RappadFire]");
-							break;
-						case 1:
-							ThisPlayer.sendMessage("[OddArrow] [Remote Explosions] type (/boom) to detonate.");
-							break;		
-						case 2:
-							ThisPlayer.sendMessage("[OddArrow] [Create Light]");
-							break;	
-						case 3:
-							ThisPlayer.sendMessage("[OddArrow] [Replace With" + getArrowMaterial(ThisPlayer) + "]");
-							break;
-						case 4:
-							ThisPlayer.sendMessage("[OddArrow] [Create " + getArrowMaterial(ThisPlayer) + "]");
-							break;
-						case 5:
-							ThisPlayer.sendMessage("[OddArrow] [Topsoil removal]");
-							break;
-						case 6:
-							ThisPlayer.sendMessage("[OddArrow] [Lightning strike]");
-							break;
-						case 7:
-							ThisPlayer.sendMessage("[OddArrow] [Arrow Rider]");
-							break;
-						default:
-							ThisPlayer.sendMessage("[OddArrow] [Off]");
-							setPlayerMode(ThisPlayer, -1);
-							break;	
-					}
+		PermissionManager permissions = PermissionsEx.getPermissionManager();
+
+	    // Permission check
+	    if(permissions.has((Player) sender, "com.isitbroken.oddarrow.permission")){
+	    // yay!
+			if (isPlayer((Player) sender)){
+				Player ThisPlayer = (Player) sender;
+				
+				if (commandLable.equalsIgnoreCase("Boom")){
+					setOffArrowExplosions(ThisPlayer);
 					return true;
+				}else if (commandLable.equalsIgnoreCase("oar")){
+					setIfPlayer(ThisPlayer,false);
+					sender.sendMessage("[OddArrow] Disabled.");
+					return true;
+				}else if (commandLable.equalsIgnoreCase("oa")){
+					if (args.length == 1 ){
+								 if(args[0].equalsIgnoreCase("Rappad")) {
+									 setPlayerMode(ThisPlayer, 0);
+									 ThisPlayer.sendMessage("[OddArrow] [RappadFire]");
+									 return true;
+								 }else if(args[0].equalsIgnoreCase("Remote")) {
+									 setPlayerMode(ThisPlayer, 1);
+									 ThisPlayer.sendMessage("[OddArrow] [Remote Explosions] type (/boom) to detonate.");
+									 return true;
+								 }else if(args[0].equalsIgnoreCase("Light")){
+									 setPlayerMode(ThisPlayer, 2);
+									 ThisPlayer.sendMessage("[OddArrow] [Create Light]");
+									 return true;
+								 }else if(args[0].equalsIgnoreCase("Replace")) {
+									 setPlayerMode(ThisPlayer, 3);
+									 ThisPlayer.sendMessage("[OddArrow] [Replace With" + getArrowMaterial(ThisPlayer) + "]");
+									 return true;
+								 }else if(args[0].equalsIgnoreCase("Create")) {
+									 setPlayerMode(ThisPlayer, 4);
+									 ThisPlayer.sendMessage("[OddArrow] [Create " + getArrowMaterial(ThisPlayer) + "]");
+									 return true;
+								 }else if(args[0].equalsIgnoreCase("Topsoil")) {
+									 setPlayerMode(ThisPlayer, 5);
+									 ThisPlayer.sendMessage("[OddArrow] [Topsoil removal]");
+									 return true;
+								 }else if(args[0].equalsIgnoreCase("Lightning")) {
+									 setPlayerMode(ThisPlayer, 6);
+									 ThisPlayer.sendMessage("[OddArrow] [Lightning strike]");
+									 return true;
+								 }else if(args[0].equalsIgnoreCase("Off")) {
+									 setPlayerMode(ThisPlayer, -1);
+									 ThisPlayer.sendMessage("[OddArrow] [Off]");
+									 return true;
+								 }else if( getPlayerMode(ThisPlayer) == 3 || getPlayerMode(ThisPlayer) == 4) {
+									 Material ArrowMaterial;
+									 try
+									 {
+										ArrowMaterial = Material.getMaterial(Integer.parseInt(args[0]));
+									 }
+									 catch(NumberFormatException nfe)
+									 {
+										 ArrowMaterial = Material.getMaterial(args[0]);
+									 }
+									 try{
+										 sender.sendMessage("[OddArrow] [ArrowMaterial "+ArrowMaterial.toString()+"]");
+										 setArrowMaterial(ThisPlayer,ArrowMaterial);
+										 return true;
+									 }catch(NullPointerException e){
+										 ThisPlayer.sendMessage("[OddArrow] Could not Find "+args[0]);
+										 return false;
+									 }		
+								 }
+					}else{
+						setPlayerMode(ThisPlayer,getPlayerMode(ThisPlayer)+1);
+						
+						switch (getPlayerMode(ThisPlayer)) {
+							case 0:
+								ThisPlayer.sendMessage("[OddArrow] [RappadFire]");
+								break;
+							case 1:
+								ThisPlayer.sendMessage("[OddArrow] [Remote Explosions] type (/boom) to detonate.");
+								break;		
+							case 2:
+								ThisPlayer.sendMessage("[OddArrow] [Create Light]");
+								break;	
+							case 3:
+								ThisPlayer.sendMessage("[OddArrow] [Replace With" + getArrowMaterial(ThisPlayer) + "]");
+								break;
+							case 4:
+								ThisPlayer.sendMessage("[OddArrow] [Create " + getArrowMaterial(ThisPlayer) + "]");
+								break;
+							case 5:
+								ThisPlayer.sendMessage("[OddArrow] [Topsoil removal]");
+								break;
+							case 6:
+								ThisPlayer.sendMessage("[OddArrow] [Lightning strike]");
+								break;
+							default:
+								ThisPlayer.sendMessage("[OddArrow] [Off]");
+								setPlayerMode(ThisPlayer, -1);
+								break;	
+						}
+						return true;
+					}
 				}
+				
+			}else{
+				setIfPlayer((Player) sender, true);
+				return true;
 			}
-			
-		}else{
-			setIfPlayer((Player) sender, true);
-			return true;
-		}
+	    } else {
+	    	sender.sendMessage("[OddArrow] You need permission for That");
+	    	return true;
+	    }
+	    
+	} else {
+	   Logger.getLogger("Minecraft").warning("PermissionsEx plugin are not found.");
+	   sender.sendMessage("[OddArrow] PermissionsEx plugin are not found.");
+	   return true;
+	}
 		return false;
 	}
 	

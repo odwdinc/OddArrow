@@ -4,5 +4,6 @@
 	<classpathentry kind="lib" path="OddArrow.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="lib" path="C:/Users/Blinky/Dropbox/MineCraftOs/Bukkit/craftbukkit-0.0.1-SNAPSHOT.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Blinky/Dropbox/MineCraftOs/Bukkit/plugins/PermissionsEx.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
