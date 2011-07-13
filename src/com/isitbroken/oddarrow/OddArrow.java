@@ -8,16 +8,15 @@ import java.util.logging.Logger;
 
 import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.World;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Arrow;
-import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event.Priority;
 import org.bukkit.event.Event.Type;
 
+import com.isitbroken.oddarrow.Arrowtask;
 
 import org.bukkit.plugin.PluginDescriptionFile;
 import org.bukkit.plugin.PluginManager;
@@ -29,7 +28,7 @@ import ru.tehkode.permissions.bukkit.PermissionsEx;
 public class OddArrow extends JavaPlugin{
 
 	public static OddArrow plugin;
-
+	
 	public final HashMap<Player, ArrayList<Arrow>> oddArrowListHash = new HashMap<Player, ArrayList<Arrow>>();
 	public final HashMap<Player, Float> oddArrowBlastSizeHash = new HashMap<Player, Float>();
 	public final HashMap<Player, Material> arrowMaterialHash = new HashMap<Player, Material>();
@@ -57,73 +56,6 @@ public class OddArrow extends JavaPlugin{
 		plugin = this;	
 	}
 
-
-	public Runnable Arrowtask = new Runnable() 
-	{
-		@Override
-		public synchronized void run() {
-			boolean ArrowsInFlight = true;
-			//logger.info("[OddArrow] Damond Starting..");
-
-			List<World> Worldliat = plugin.getServer().getWorlds();
-
-			while(ArrowsInFlight){
-				ArrowsInFlight = false;
-				for(int CurentWorld = 0; CurentWorld < Worldliat.size(); CurentWorld++) {
-					World Thisworld = Worldliat.get(CurentWorld);
-
-					List<Entity> arrowList = Thisworld.getEntities();
-
-					for(int CurrentArrow = 0; CurrentArrow < arrowList.size(); CurrentArrow++) {
-						Entity ThisIsArrow = arrowList.get(CurrentArrow);
-						if(ThisIsArrow instanceof Arrow){
-							Arrow ThisArrow = (Arrow) ThisIsArrow;
-							if((!ThisArrow.isDead()) && (plugin.isPlayer(ThisArrow.getShooter()))){
-								if(!plugin.getDidArrowMoved(ThisArrow)){								
-									try {
-										boolean thistimere = true;
-										long time  = ThisArrow.getWorld().getTime();
-										long curent;
-										while(thistimere) {
-											curent =  ThisArrow.getWorld().getTime()- time;
-											if (curent > 1){
-												thistimere = false;
-											}else{
-												//plugin.logger.info("Time "+ curent);
-												this.wait(1);
-											}
-										}
-
-										if (plugin.getDidArrowMoved(ThisArrow)){
-											plugin.getArrowTodo((Player) ThisArrow.getShooter(), ThisArrow);
-										}else{
-											ArrowsInFlight = true;
-										}
-									} catch (InterruptedException e) {
-										//plugin.logger.info("interpt");
-										//plugin.clearArrow(ThisArrow);
-										return;
-									} catch (NullPointerException e){
-										ArrowsInFlight = true;
-									}
-
-								}else{
-									ArrowsInFlight = true;
-								}
-
-
-							}		
-						}
-					}
-
-
-				}
-
-			}
-			//logger.info("[OddArrow] Damond Going to sleep !");
-		}
-	};
-
 	//@SuppressWarnings("deprecation")
 	public void lookforarrows(Player Arrowshooter){
 
@@ -135,7 +67,7 @@ public class OddArrow extends JavaPlugin{
 				getServer().getScheduler().cancelTask(thislooper);
 			}
 
-			thislooper = getServer().getScheduler().scheduleAsyncDelayedTask(this, Arrowtask, 2);
+			thislooper = getServer().getScheduler().scheduleAsyncDelayedTask(this, new Arrowtask(Arrowshooter), 2);
 			oddArrowTaskHash.put(Arrowshooter, thislooper);
 		}else{
 			//Arrowshooter.sendMessage("You need run /oa");
