@@ -27,14 +27,14 @@ public class OddArrow extends JavaPlugin{
 	
 	public static OddArrow plugin;
 	
-	public final HashMap<Player, ArrayList<Arrow>> OddArrowArrows = new HashMap<Player, ArrayList<Arrow>>();
-	public final HashMap<Player, Float> OddArrowBlastSize = new HashMap<Player, Float>();
-	public final HashMap<Player, Material> ArrowMaterial = new HashMap<Player, Material>();
-	public final HashMap<Player, Integer > OddArrowMode = new HashMap<Player, Integer>();
-	public final HashMap<Player, Boolean > OddArrowEnabled = new HashMap<Player, Boolean>();
-	public final HashMap<Arrow, Double> startlocation = new HashMap<Arrow, Double>();
+	public final HashMap<Player, ArrayList<Arrow>> oddArrowListHash = new HashMap<Player, ArrayList<Arrow>>();
+	public final HashMap<Player, Float> oddArrowBlastSizeHash = new HashMap<Player, Float>();
+	public final HashMap<Player, Material> arrowMaterialHash = new HashMap<Player, Material>();
+	public final HashMap<Player, Integer > oddArrowModeHash = new HashMap<Player, Integer>();
+	public final HashMap<Player, Boolean > oddArrowEnabledHash = new HashMap<Player, Boolean>();
+	public final HashMap<Arrow, Double> arrowTestLocationHash = new HashMap<Arrow, Double>();
 	
-	public final HashMap<Player, Integer > OddArrowLooper = new HashMap<Player, Integer>();
+	public final HashMap<Player, Integer > oddArrowTaskHash = new HashMap<Player, Integer>();
 	
 	public final Logger logger = Logger.getLogger("Minecraft");
 	
@@ -75,8 +75,8 @@ public class OddArrow extends JavaPlugin{
 						Entity ThisIsArrow = arrowList.get(CurrentArrow);
 						if(ThisIsArrow instanceof Arrow){
 							Arrow ThisArrow = (Arrow) ThisIsArrow;
-							if((!ThisArrow.isDead()) && (plugin.isLivingEntity(ThisArrow.getShooter()))){
-								if(!plugin.TestArrow(ThisArrow)){								
+							if((!ThisArrow.isDead()) && (plugin.isPlayer(ThisArrow.getShooter()))){
+								if(!plugin.getDidArrowMoved(ThisArrow)){								
 										try {
 											boolean thistimere = true;
 											long time  = ThisArrow.getWorld().getTime();
@@ -91,8 +91,8 @@ public class OddArrow extends JavaPlugin{
 												}
 											}
 											
-											if (plugin.TestArrow(ThisArrow)){
-												plugin.ThisOddArrow((Player) ThisArrow.getShooter(), ThisArrow);
+											if (plugin.getDidArrowMoved(ThisArrow)){
+												plugin.getArrowTodo((Player) ThisArrow.getShooter(), ThisArrow);
 											}else{
 												ArrowsInFlight = true;
 											}
@@ -127,13 +127,13 @@ public class OddArrow extends JavaPlugin{
 		if (isPlayer(Arrowshooter)){
 			//Arrowshooter.sendMessage("Lest see Where that went");
 			int thislooper;
-			if(OddArrowLooper.containsKey(Arrowshooter)){
-				thislooper = OddArrowLooper.get(Arrowshooter);
+			if(oddArrowTaskHash.containsKey(Arrowshooter)){
+				thislooper = oddArrowTaskHash.get(Arrowshooter);
 				getServer().getScheduler().cancelTask(thislooper);
 			}
 			
 			thislooper = getServer().getScheduler().scheduleAsyncDelayedTask(this, Arrowtask, 2);
-			OddArrowLooper.put(Arrowshooter, thislooper);
+			oddArrowTaskHash.put(Arrowshooter, thislooper);
 		}else{
 			//Arrowshooter.sendMessage("You need run /oa");
 		}
@@ -143,65 +143,65 @@ public class OddArrow extends JavaPlugin{
 	
 	public boolean isPlayer(final Player incoming){
 		
-		if (OddArrowEnabled.containsKey(incoming)){
-			return OddArrowEnabled.get(incoming);
+		if (oddArrowEnabledHash.containsKey(incoming)){
+			return oddArrowEnabledHash.get(incoming);
 		}
 		return false;
 	}
 	
-	public boolean isLivingEntity(final LivingEntity incoming){
+	public boolean isPlayer(final LivingEntity incoming){
 		
-		if (OddArrowEnabled.containsKey(incoming)){
-			return OddArrowEnabled.get(incoming);
+		if (oddArrowEnabledHash.containsKey(incoming)){
+			return oddArrowEnabledHash.get(incoming);
 		}
 		return false;
 	}
 	
-	public void enablePlayer(final Player incoming, final Boolean value){
+	public void setIfPlayer(final Player incoming, final Boolean value){
 		if(value){
-			OddArrowEnabled.put(incoming, value);
+			oddArrowEnabledHash.put(incoming, value);
 			incoming.sendMessage("[OddArrow] Welcomes you.");
 			incoming.sendMessage("[OddArrow] [RappadFire]");
 			setPlayerMode(incoming,0);
 		}else{
-			OddArrowEnabled.remove(incoming);
+			oddArrowEnabledHash.remove(incoming);
 			incoming.sendMessage("[OddArrow] Will miss you.");
 		}
 	}
 	
 	public void setPlayerMode(final Player incoming, final Integer value){
-		if (!OddArrowMode.containsKey(incoming)){
+		if (!oddArrowModeHash.containsKey(incoming)){
 			
 		}
-		OddArrowMode.put(incoming, value);
+		oddArrowModeHash.put(incoming, value);
 	}
 	
 	public Integer getPlayerMode(final Player incoming){
-		if (OddArrowMode.containsKey(incoming)){
-			return OddArrowMode.get(incoming);
+		if (oddArrowModeHash.containsKey(incoming)){
+			return oddArrowModeHash.get(incoming);
 		}else{
-			OddArrowMode.put(incoming, 0);
+			oddArrowModeHash.put(incoming, 0);
 			return 0;
 		}
 	}
 	
 	
 	public void setArrowMaterial(final Player incoming, final Material value){
-			ArrowMaterial.put(incoming, value);
+			arrowMaterialHash.put(incoming, value);
 	}
 	
 	public Material getArrowMaterial(final Player incoming){
-		if (ArrowMaterial.containsKey(incoming)){
-			return ArrowMaterial.get(incoming);
+		if (arrowMaterialHash.containsKey(incoming)){
+			return arrowMaterialHash.get(incoming);
 		}else{
-			ArrowMaterial.put(incoming, Material.GLOWSTONE);
+			arrowMaterialHash.put(incoming, Material.GLOWSTONE);
 			return Material.GLOWSTONE;
 		}
 	}
 	
 	public ArrayList<Arrow> getArrowList(final Player incoming){
-		if(OddArrowArrows.containsKey(incoming)){
-			return OddArrowArrows.get(incoming);
+		if(oddArrowListHash.containsKey(incoming)){
+			return oddArrowListHash.get(incoming);
 		}else{
 			return new ArrayList<Arrow>();
 		}
@@ -209,29 +209,29 @@ public class OddArrow extends JavaPlugin{
 	
 	
 	public void setArrowList(final Player incoming, final ArrayList<Arrow> value){
-		if(OddArrowArrows.containsKey(incoming)){
-			 OddArrowArrows.put(incoming,value);
+		if(oddArrowListHash.containsKey(incoming)){
+			 oddArrowListHash.put(incoming,value);
 		}else{
-			OddArrowArrows.put(incoming, new ArrayList<Arrow>());
+			oddArrowListHash.put(incoming, new ArrayList<Arrow>());
 		}
 			
 	}
 	
 	public float getBlastSiz(final Player incoming){
-		if (OddArrowBlastSize.containsKey(incoming)){
-			return OddArrowBlastSize.get(incoming);
+		if (oddArrowBlastSizeHash.containsKey(incoming)){
+			return oddArrowBlastSizeHash.get(incoming);
 		}else{
-			OddArrowBlastSize.put(incoming, (float) 5);
+			oddArrowBlastSizeHash.put(incoming, (float) 5);
 			return 5;
 		}
 		
 		
 	}
 	
-	public synchronized void  ArrowExplosions(Player incoming){
+	public synchronized void  setOffArrowExplosions(Player incoming){
 		
-		if (OddArrowArrows.containsKey(incoming)){
-			List<Arrow> arrowList = OddArrowArrows.get(incoming); 
+		if (oddArrowListHash.containsKey(incoming)){
+			List<Arrow> arrowList = oddArrowListHash.get(incoming); 
 			for(int arrow = 0; arrow < arrowList.size(); arrow++) {
 				Arrow ThisArrow = arrowList.get(arrow);
 				if (!ThisArrow.isDead()){
@@ -247,17 +247,7 @@ public class OddArrow extends JavaPlugin{
 		
 	}
 	
-	
-	public Float getBlastzise(Player ThisPlayer){
-		if(OddArrowBlastSize.containsKey(ThisPlayer)){
-			return OddArrowBlastSize.get(ThisPlayer);
-		}else{
-			OddArrowBlastSize.put(ThisPlayer, (float) 5);
-			return (float) 5;
-		}
-	}
-	
-	public synchronized void ThisOddArrowbulder(final Player ThisPlayer,final Location thisArrow, final Material thisMaterial, final Integer value ){
+	public synchronized void setLocationsMaterial(final Player ThisPlayer,final Location thisArrow, final Material thisMaterial, final Integer value ){
 		if (value != 0 ){
 			for(int x = -1*value; x < value; x++){
 				for(int y = -1*value; y < value; y++){
@@ -276,23 +266,23 @@ public class OddArrow extends JavaPlugin{
 		
 	}
 	
-	public synchronized boolean TestArrow(Arrow thisArrow) {
+	public synchronized boolean getDidArrowMoved(Arrow thisArrow) {
 		
-		if (!startlocation.containsKey(thisArrow)){	
+		if (!arrowTestLocationHash.containsKey(thisArrow)){	
 			//logger.info("[OddArrow] Found arrow!");
-			startlocation.put(thisArrow, thisArrow.getLocation().getY());	
+			arrowTestLocationHash.put(thisArrow, thisArrow.getLocation().getY());	
 		}else{
 			
 			//if (thisArrow.getWorld().getBlockAt(thisArrow.getLocation()).getType() == Material.AIR){
 			//	thisArrow.getWorld().getBlockAt(thisArrow.getLocation().add(0, 1, 0)).setType(Material.WOOL);
 			//}
 			
-			if(startlocation.get(thisArrow).equals(thisArrow.getLocation().getY())){
-				startlocation.remove(thisArrow);
+			if(arrowTestLocationHash.get(thisArrow).equals(thisArrow.getLocation().getY())){
+				arrowTestLocationHash.remove(thisArrow);
 				return true;
 			}else{
 				//logger.info("[OddArrow] Testing arrow " + thisArrow.getEntityId() + thisArrow.getVelocity().getY());
-				startlocation.put(thisArrow, thisArrow.getLocation().getY());
+				arrowTestLocationHash.put(thisArrow, thisArrow.getLocation().getY());
 			}
 			
 		}
@@ -300,72 +290,58 @@ public class OddArrow extends JavaPlugin{
 	}	
 	
 	
-	public synchronized boolean clearArrow(Arrow thisArrow) {
+	public synchronized boolean clearArrowLocation(Arrow thisArrow) {
 		
-		if (!startlocation.containsKey(thisArrow)){	
+		if (!arrowTestLocationHash.containsKey(thisArrow)){	
 			//logger.info("[OddArrow] Found arrow!");
-			startlocation.put(thisArrow, (double) 0);
+			arrowTestLocationHash.put(thisArrow, (double) 0);
 			return true;
 		}else{
 			return false;
 		}
 	}	
 	
-	public void ArrowList(Player thisPlayer) {
-		
-		List<Entity> arrowList = thisPlayer.getNearbyEntities(100, 100, 100);
-		
-		for(int arrow = 0; arrow < arrowList.size(); arrow++) {
-			Entity curr;
-			curr = arrowList.get(arrow);
-			if(curr instanceof Arrow){
-				LivingEntity entity = ((Arrow) curr).getShooter();
-				
-				thisPlayer.sendMessage("[] " + entity.toString());
-			}
-		}
-		
-	}
-	
-	
-	public synchronized void ThisOddArrow(Player ThisPlayer, Arrow thisArrow){
+	public synchronized void getArrowTodo(Player ThisPlayer, Arrow thisArrow){
 		switch (getPlayerMode(ThisPlayer)) {
 		case 0://rappade
-			OddArrowBlastSize.put(ThisPlayer, (float) 5);
-			thisArrow.getWorld().createExplosion(thisArrow.getLocation(), getBlastzise(ThisPlayer));
+			oddArrowBlastSizeHash.put(ThisPlayer, (float) 5);
+			thisArrow.getWorld().createExplosion(thisArrow.getLocation(), getBlastSiz(ThisPlayer));
 			thisArrow.remove();
 			break;
 		case 1://remote
-			if (OddArrowArrows.containsKey(ThisPlayer)){
-				ArrayList<Arrow> ThisList = OddArrowArrows.get(ThisPlayer);
+			if (oddArrowListHash.containsKey(ThisPlayer)){
+				ArrayList<Arrow> ThisList = oddArrowListHash.get(ThisPlayer);
 				ThisList.add(thisArrow);
-				OddArrowArrows.put(ThisPlayer, ThisList);
+				oddArrowListHash.put(ThisPlayer, ThisList);
 			}else{
 				ArrayList<Arrow> ThisList = new ArrayList<Arrow>();
 				ThisList.add(thisArrow);
-				OddArrowArrows.put(ThisPlayer, new ArrayList<Arrow>());
+				oddArrowListHash.put(ThisPlayer, new ArrayList<Arrow>());
 			}
 			break;		
 		case 2://light
-			ThisOddArrowbulder(ThisPlayer,thisArrow.getLocation(), Material.GLOWSTONE, 1);
+			setLocationsMaterial(ThisPlayer,thisArrow.getLocation(), Material.GLOWSTONE, 1);
 			thisArrow.remove();
 			break;	
 		case 3: //replace
-			ThisOddArrowbulder(ThisPlayer,thisArrow.getLocation(),getArrowMaterial(ThisPlayer), 2);
+			setLocationsMaterial(ThisPlayer,thisArrow.getLocation(),getArrowMaterial(ThisPlayer), 2);
 			thisArrow.remove();
 			break;
 		case 4://crate
-			ThisOddArrowbulder(ThisPlayer,thisArrow.getLocation(),getArrowMaterial(ThisPlayer), 0);
+			setLocationsMaterial(ThisPlayer,thisArrow.getLocation(),getArrowMaterial(ThisPlayer), 0);
 			thisArrow.remove();
 			break;	
 		case 5://top
-			OddArrowBlastSize.put(ThisPlayer, (float) 1);
-			thisArrow.getWorld().createExplosion(thisArrow.getLocation(), getBlastzise(ThisPlayer));
+			oddArrowBlastSizeHash.put(ThisPlayer, (float) 1);
+			thisArrow.getWorld().createExplosion(thisArrow.getLocation(), getBlastSiz(ThisPlayer));
+			thisArrow.remove();
+			break;
+		case 6://Lightning strike
+			thisArrow.getWorld().strikeLightning(thisArrow.getLocation());
 			thisArrow.remove();
 			break;
 		}
-	
-		
+
 	}
 
 
@@ -377,13 +353,10 @@ public class OddArrow extends JavaPlugin{
 			Player ThisPlayer = (Player) sender;
 			
 			if (commandLable.equalsIgnoreCase("Boom")){
-				ArrowExplosions(ThisPlayer);
-				return true;
-			}else if (commandLable.equalsIgnoreCase("listoa")){
-				ArrowList(ThisPlayer);
+				setOffArrowExplosions(ThisPlayer);
 				return true;
 			}else if (commandLable.equalsIgnoreCase("oar")){
-				enablePlayer(ThisPlayer,false);
+				setIfPlayer(ThisPlayer,false);
 				sender.sendMessage("[OddArrow] Disabled.");
 				return true;
 			}else if (commandLable.equalsIgnoreCase("oa")){
@@ -458,6 +431,12 @@ public class OddArrow extends JavaPlugin{
 							ThisPlayer.sendMessage("[OddArrow] [Topsoil removal]");
 							break;
 						case 6:
+							ThisPlayer.sendMessage("[OddArrow] [Lightning strike]");
+							break;
+						case 7:
+							ThisPlayer.sendMessage("[OddArrow] [Arrow Rider]");
+							break;
+						default:
 							ThisPlayer.sendMessage("[OddArrow] [Off]");
 							setPlayerMode(ThisPlayer, -1);
 							break;	
@@ -467,7 +446,7 @@ public class OddArrow extends JavaPlugin{
 			}
 			
 		}else{
-			enablePlayer((Player) sender, true);
+			setIfPlayer((Player) sender, true);
 			return true;
 		}
 		return false;
