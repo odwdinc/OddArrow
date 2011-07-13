@@ -27,27 +27,27 @@ import ru.tehkode.permissions.PermissionManager;
 import ru.tehkode.permissions.bukkit.PermissionsEx;
 
 public class OddArrow extends JavaPlugin{
-	
+
 	public static OddArrow plugin;
-	
+
 	public final HashMap<Player, ArrayList<Arrow>> oddArrowListHash = new HashMap<Player, ArrayList<Arrow>>();
 	public final HashMap<Player, Float> oddArrowBlastSizeHash = new HashMap<Player, Float>();
 	public final HashMap<Player, Material> arrowMaterialHash = new HashMap<Player, Material>();
 	public final HashMap<Player, Integer > oddArrowModeHash = new HashMap<Player, Integer>();
 	public final HashMap<Player, Boolean > oddArrowEnabledHash = new HashMap<Player, Boolean>();
 	public final HashMap<Arrow, Double> arrowTestLocationHash = new HashMap<Arrow, Double>();
-	
+
 	public final HashMap<Player, Integer > oddArrowTaskHash = new HashMap<Player, Integer>();
-	
+
 	public final Logger logger = Logger.getLogger("Minecraft");
-	
+
 	PbEntityListener playerListener =  new PbEntityListener(this);
-	
+
 	@Override
 	public void onDisable() {
 		this.logger.info("OddArrow is Disabled!");
 	}
-	
+
 	@Override
 	public void onEnable() {
 		PluginManager pm = getServer().getPluginManager();		
@@ -56,77 +56,77 @@ public class OddArrow extends JavaPlugin{
 		this.logger.info( pdfFile.getName() + " version " + pdfFile.getVersion() + " is Enabled");
 		plugin = this;	
 	}
-	
-	
+
+
 	public Runnable Arrowtask = new Runnable() 
 	{
 		@Override
 		public synchronized void run() {
 			boolean ArrowsInFlight = true;
 			//logger.info("[OddArrow] Damond Starting..");
-			
+
 			List<World> Worldliat = plugin.getServer().getWorlds();
-			
+
 			while(ArrowsInFlight){
 				ArrowsInFlight = false;
 				for(int CurentWorld = 0; CurentWorld < Worldliat.size(); CurentWorld++) {
 					World Thisworld = Worldliat.get(CurentWorld);
-					
+
 					List<Entity> arrowList = Thisworld.getEntities();
-					
+
 					for(int CurrentArrow = 0; CurrentArrow < arrowList.size(); CurrentArrow++) {
 						Entity ThisIsArrow = arrowList.get(CurrentArrow);
 						if(ThisIsArrow instanceof Arrow){
 							Arrow ThisArrow = (Arrow) ThisIsArrow;
 							if((!ThisArrow.isDead()) && (plugin.isPlayer(ThisArrow.getShooter()))){
 								if(!plugin.getDidArrowMoved(ThisArrow)){								
-										try {
-											boolean thistimere = true;
-											long time  = ThisArrow.getWorld().getTime();
-											long curent;
-											while(thistimere) {
-												curent =  ThisArrow.getWorld().getTime()- time;
-												if (curent > 1){
-													thistimere = false;
-												}else{
-													//plugin.logger.info("Time "+ curent);
-													this.wait(1);
-												}
-											}
-											
-											if (plugin.getDidArrowMoved(ThisArrow)){
-												plugin.getArrowTodo((Player) ThisArrow.getShooter(), ThisArrow);
+									try {
+										boolean thistimere = true;
+										long time  = ThisArrow.getWorld().getTime();
+										long curent;
+										while(thistimere) {
+											curent =  ThisArrow.getWorld().getTime()- time;
+											if (curent > 1){
+												thistimere = false;
 											}else{
-												ArrowsInFlight = true;
+												//plugin.logger.info("Time "+ curent);
+												this.wait(1);
 											}
-										} catch (InterruptedException e) {
-											//plugin.logger.info("interpt");
-											//plugin.clearArrow(ThisArrow);
-											return;
-										} catch (NullPointerException e){
+										}
+
+										if (plugin.getDidArrowMoved(ThisArrow)){
+											plugin.getArrowTodo((Player) ThisArrow.getShooter(), ThisArrow);
+										}else{
 											ArrowsInFlight = true;
 										}
-								
+									} catch (InterruptedException e) {
+										//plugin.logger.info("interpt");
+										//plugin.clearArrow(ThisArrow);
+										return;
+									} catch (NullPointerException e){
+										ArrowsInFlight = true;
+									}
+
 								}else{
 									ArrowsInFlight = true;
 								}
-								
-								
+
+
 							}		
 						}
 					}
-					
-					
+
+
 				}
-				
+
 			}
 			//logger.info("[OddArrow] Damond Going to sleep !");
 		}
 	};
-	
+
 	//@SuppressWarnings("deprecation")
 	public void lookforarrows(Player Arrowshooter){
-		
+
 		if (isPlayer(Arrowshooter)){
 			//Arrowshooter.sendMessage("Lest see Where that went");
 			int thislooper;
@@ -134,32 +134,32 @@ public class OddArrow extends JavaPlugin{
 				thislooper = oddArrowTaskHash.get(Arrowshooter);
 				getServer().getScheduler().cancelTask(thislooper);
 			}
-			
+
 			thislooper = getServer().getScheduler().scheduleAsyncDelayedTask(this, Arrowtask, 2);
 			oddArrowTaskHash.put(Arrowshooter, thislooper);
 		}else{
 			//Arrowshooter.sendMessage("You need run /oa");
 		}
-		
-		
+
+
 	}
-	
+
 	public boolean isPlayer(final Player incoming){
-		
+
 		if (oddArrowEnabledHash.containsKey(incoming)){
 			return oddArrowEnabledHash.get(incoming);
 		}
 		return false;
 	}
-	
+
 	public boolean isPlayer(final LivingEntity incoming){
-		
+
 		if (oddArrowEnabledHash.containsKey(incoming)){
 			return oddArrowEnabledHash.get(incoming);
 		}
 		return false;
 	}
-	
+
 	public void setIfPlayer(final Player incoming, final Boolean value){
 		if(value){
 			oddArrowEnabledHash.put(incoming, value);
@@ -171,14 +171,14 @@ public class OddArrow extends JavaPlugin{
 			incoming.sendMessage("[OddArrow] Will miss you.");
 		}
 	}
-	
+
 	public void setPlayerMode(final Player incoming, final Integer value){
 		if (!oddArrowModeHash.containsKey(incoming)){
-			
+
 		}
 		oddArrowModeHash.put(incoming, value);
 	}
-	
+
 	public Integer getPlayerMode(final Player incoming){
 		if (oddArrowModeHash.containsKey(incoming)){
 			return oddArrowModeHash.get(incoming);
@@ -187,12 +187,12 @@ public class OddArrow extends JavaPlugin{
 			return 0;
 		}
 	}
-	
-	
+
+
 	public void setArrowMaterial(final Player incoming, final Material value){
-			arrowMaterialHash.put(incoming, value);
+		arrowMaterialHash.put(incoming, value);
 	}
-	
+
 	public Material getArrowMaterial(final Player incoming){
 		if (arrowMaterialHash.containsKey(incoming)){
 			return arrowMaterialHash.get(incoming);
@@ -201,7 +201,7 @@ public class OddArrow extends JavaPlugin{
 			return Material.GLOWSTONE;
 		}
 	}
-	
+
 	public ArrayList<Arrow> getArrowList(final Player incoming){
 		if(oddArrowListHash.containsKey(incoming)){
 			return oddArrowListHash.get(incoming);
@@ -209,17 +209,17 @@ public class OddArrow extends JavaPlugin{
 			return new ArrayList<Arrow>();
 		}
 	}
-	
-	
+
+
 	public void setArrowList(final Player incoming, final ArrayList<Arrow> value){
 		if(oddArrowListHash.containsKey(incoming)){
-			 oddArrowListHash.put(incoming,value);
+			oddArrowListHash.put(incoming,value);
 		}else{
 			oddArrowListHash.put(incoming, new ArrayList<Arrow>());
 		}
-			
+
 	}
-	
+
 	public float getBlastSiz(final Player incoming){
 		if (oddArrowBlastSizeHash.containsKey(incoming)){
 			return oddArrowBlastSizeHash.get(incoming);
@@ -227,12 +227,12 @@ public class OddArrow extends JavaPlugin{
 			oddArrowBlastSizeHash.put(incoming, (float) 5);
 			return 5;
 		}
-		
-		
+
+
 	}
-	
+
 	public synchronized void  setOffArrowExplosions(Player incoming){
-		
+
 		if (oddArrowListHash.containsKey(incoming)){
 			List<Arrow> arrowList = oddArrowListHash.get(incoming); 
 			for(int arrow = 0; arrow < arrowList.size(); arrow++) {
@@ -247,9 +247,9 @@ public class OddArrow extends JavaPlugin{
 			}
 			arrowList.clear();
 		}
-		
+
 	}
-	
+
 	public synchronized void setLocationsMaterial(final Player ThisPlayer,final Location thisArrow, final Material thisMaterial, final Integer value ){
 		if (value != 0 ){
 			for(int x = -1*value; x < value; x++){
@@ -261,28 +261,28 @@ public class OddArrow extends JavaPlugin{
 						}
 					}
 				}
-				
+
 			}
 		}else{
 			thisArrow.getWorld().getBlockAt(thisArrow).setType(thisMaterial);
 		}
-		
+
 	}
-	
+
 	public synchronized boolean getDidArrowMoved(Arrow thisArrow) {
-		
+
 		if (!arrowTestLocationHash.containsKey(thisArrow)){	
 			//logger.info("[OddArrow] Found arrow!");
 			arrowTestLocationHash.put(thisArrow, thisArrow.getLocation().getY());	
 		}else{
-			
+
 			switch (getPlayerMode((Player) thisArrow.getShooter())) {
 			}
-			
+
 			//if (thisArrow.getWorld().getBlockAt(thisArrow.getLocation()).getType() == Material.AIR){
 			//	thisArrow.getWorld().getBlockAt(thisArrow.getLocation().add(0, 1, 0)).setType(Material.WOOL);
 			//}
-			
+
 			if(arrowTestLocationHash.get(thisArrow).equals(thisArrow.getLocation().getY())){
 				arrowTestLocationHash.remove(thisArrow);
 				return true;
@@ -290,14 +290,14 @@ public class OddArrow extends JavaPlugin{
 				//logger.info("[OddArrow] Testing arrow " + thisArrow.getEntityId() + thisArrow.getVelocity().getY());
 				arrowTestLocationHash.put(thisArrow, thisArrow.getLocation().getY());
 			}
-			
+
 		}
 		return false;
 	}	
-	
-	
+
+
 	public synchronized boolean clearArrowLocation(Arrow thisArrow) {
-		
+
 		if (!arrowTestLocationHash.containsKey(thisArrow)){	
 			//logger.info("[OddArrow] Found arrow!");
 			arrowTestLocationHash.put(thisArrow, (double) 0);
@@ -306,7 +306,7 @@ public class OddArrow extends JavaPlugin{
 			return false;
 		}
 	}	
-	
+
 	public synchronized void getArrowTodo(Player ThisPlayer, Arrow thisArrow){
 		switch (getPlayerMode(ThisPlayer)) {
 		case 0://rappade
@@ -350,132 +350,125 @@ public class OddArrow extends JavaPlugin{
 
 	}
 
-
-
-
-	public boolean onCommand (CommandSender sender, Command cmd, String commandLable, String[] args){
-		
+	public boolean onPermission(Player player , String permission){
 		if(getServer().getPluginManager().isPluginEnabled("PermissionsEx")){
-			
-		PermissionManager permissions = PermissionsEx.getPermissionManager();
-
-	    // Permission check
-	    if(permissions.has((Player) sender, "com.isitbroken.oddarrow.permission")){
-	    // yay!
-			if (isPlayer((Player) sender)){
-				Player ThisPlayer = (Player) sender;
-				
-				if (commandLable.equalsIgnoreCase("Boom")){
-					setOffArrowExplosions(ThisPlayer);
-					return true;
-				}else if (commandLable.equalsIgnoreCase("oar")){
-					setIfPlayer(ThisPlayer,false);
-					sender.sendMessage("[OddArrow] Disabled.");
-					return true;
-				}else if (commandLable.equalsIgnoreCase("oa")){
-					if (args.length == 1 ){
-								 if(args[0].equalsIgnoreCase("Rappad")) {
-									 setPlayerMode(ThisPlayer, 0);
-									 ThisPlayer.sendMessage("[OddArrow] [RappadFire]");
-									 return true;
-								 }else if(args[0].equalsIgnoreCase("Remote")) {
-									 setPlayerMode(ThisPlayer, 1);
-									 ThisPlayer.sendMessage("[OddArrow] [Remote Explosions] type (/boom) to detonate.");
-									 return true;
-								 }else if(args[0].equalsIgnoreCase("Light")){
-									 setPlayerMode(ThisPlayer, 2);
-									 ThisPlayer.sendMessage("[OddArrow] [Create Light]");
-									 return true;
-								 }else if(args[0].equalsIgnoreCase("Replace")) {
-									 setPlayerMode(ThisPlayer, 3);
-									 ThisPlayer.sendMessage("[OddArrow] [Replace With" + getArrowMaterial(ThisPlayer) + "]");
-									 return true;
-								 }else if(args[0].equalsIgnoreCase("Create")) {
-									 setPlayerMode(ThisPlayer, 4);
-									 ThisPlayer.sendMessage("[OddArrow] [Create " + getArrowMaterial(ThisPlayer) + "]");
-									 return true;
-								 }else if(args[0].equalsIgnoreCase("Topsoil")) {
-									 setPlayerMode(ThisPlayer, 5);
-									 ThisPlayer.sendMessage("[OddArrow] [Topsoil removal]");
-									 return true;
-								 }else if(args[0].equalsIgnoreCase("Lightning")) {
-									 setPlayerMode(ThisPlayer, 6);
-									 ThisPlayer.sendMessage("[OddArrow] [Lightning strike]");
-									 return true;
-								 }else if(args[0].equalsIgnoreCase("Off")) {
-									 setPlayerMode(ThisPlayer, -1);
-									 ThisPlayer.sendMessage("[OddArrow] [Off]");
-									 return true;
-								 }else if( getPlayerMode(ThisPlayer) == 3 || getPlayerMode(ThisPlayer) == 4) {
-									 Material ArrowMaterial;
-									 try
-									 {
-										ArrowMaterial = Material.getMaterial(Integer.parseInt(args[0]));
-									 }
-									 catch(NumberFormatException nfe)
-									 {
-										 ArrowMaterial = Material.getMaterial(args[0]);
-									 }
-									 try{
-										 sender.sendMessage("[OddArrow] [ArrowMaterial "+ArrowMaterial.toString()+"]");
-										 setArrowMaterial(ThisPlayer,ArrowMaterial);
-										 return true;
-									 }catch(NullPointerException e){
-										 ThisPlayer.sendMessage("[OddArrow] Could not Find "+args[0]);
-										 return false;
-									 }		
-								 }
-					}else{
-						setPlayerMode(ThisPlayer,getPlayerMode(ThisPlayer)+1);
-						
-						switch (getPlayerMode(ThisPlayer)) {
-							case 0:
-								ThisPlayer.sendMessage("[OddArrow] [RappadFire]");
-								break;
-							case 1:
-								ThisPlayer.sendMessage("[OddArrow] [Remote Explosions] type (/boom) to detonate.");
-								break;		
-							case 2:
-								ThisPlayer.sendMessage("[OddArrow] [Create Light]");
-								break;	
-							case 3:
-								ThisPlayer.sendMessage("[OddArrow] [Replace With" + getArrowMaterial(ThisPlayer) + "]");
-								break;
-							case 4:
-								ThisPlayer.sendMessage("[OddArrow] [Create " + getArrowMaterial(ThisPlayer) + "]");
-								break;
-							case 5:
-								ThisPlayer.sendMessage("[OddArrow] [Topsoil removal]");
-								break;
-							case 6:
-								ThisPlayer.sendMessage("[OddArrow] [Lightning strike]");
-								break;
-							default:
-								ThisPlayer.sendMessage("[OddArrow] [Off]");
-								setPlayerMode(ThisPlayer, -1);
-								break;	
-						}
-						return true;
-					}
-				}
-				
+			PermissionManager permissions = PermissionsEx.getPermissionManager();
+			if(permissions.has(player, permission)){
+				return false;
 			}else{
-				setIfPlayer((Player) sender, true);
+				player.sendMessage("You need permission");
 				return true;
 			}
-	    } else {
-	    	sender.sendMessage("[OddArrow] You need permission for That");
-	    	return true;
-	    }
-	    
-	} else {
-	   Logger.getLogger("Minecraft").warning("PermissionsEx plugin are not found.");
-	   sender.sendMessage("[OddArrow] PermissionsEx plugin are not found.");
-	   return true;
+		}else{
+			return false;
+		}
+		
 	}
+
+	public boolean onCommand (CommandSender sender, Command cmd, String commandLable, String[] args){
+		// Permission check
+		if(onPermission((Player) sender, "com.isitbroken.oddarrow.permission"))return false;
+		if (isPlayer((Player) sender)){
+			Player ThisPlayer = (Player) sender;
+
+			if (commandLable.equalsIgnoreCase("Boom")){
+				setOffArrowExplosions(ThisPlayer);
+				return true;
+			}else if (commandLable.equalsIgnoreCase("oar")){
+				setIfPlayer(ThisPlayer,false);
+				sender.sendMessage("[OddArrow] Disabled.");
+				return true;
+			}else if (commandLable.equalsIgnoreCase("oa")){
+				if (args.length == 1 ){
+					if(args[0].equalsIgnoreCase("Rappad")) {
+						setPlayerMode(ThisPlayer, 0);
+						ThisPlayer.sendMessage("[OddArrow] [RappadFire]");
+						return true;
+					}else if(args[0].equalsIgnoreCase("Remote")) {
+						setPlayerMode(ThisPlayer, 1);
+						ThisPlayer.sendMessage("[OddArrow] [Remote Explosions] type (/boom) to detonate.");
+						return true;
+					}else if(args[0].equalsIgnoreCase("Light")){
+						setPlayerMode(ThisPlayer, 2);
+						ThisPlayer.sendMessage("[OddArrow] [Create Light]");
+						return true;
+					}else if(args[0].equalsIgnoreCase("Replace")) {
+						setPlayerMode(ThisPlayer, 3);
+						ThisPlayer.sendMessage("[OddArrow] [Replace With" + getArrowMaterial(ThisPlayer) + "]");
+						return true;
+					}else if(args[0].equalsIgnoreCase("Create")) {
+						setPlayerMode(ThisPlayer, 4);
+						ThisPlayer.sendMessage("[OddArrow] [Create " + getArrowMaterial(ThisPlayer) + "]");
+						return true;
+					}else if(args[0].equalsIgnoreCase("Topsoil")) {
+						setPlayerMode(ThisPlayer, 5);
+						ThisPlayer.sendMessage("[OddArrow] [Topsoil removal]");
+						return true;
+					}else if(args[0].equalsIgnoreCase("Lightning")) {
+						setPlayerMode(ThisPlayer, 6);
+						ThisPlayer.sendMessage("[OddArrow] [Lightning strike]");
+						return true;
+					}else if(args[0].equalsIgnoreCase("Off")) {
+						setPlayerMode(ThisPlayer, -1);
+						ThisPlayer.sendMessage("[OddArrow] [Off]");
+						return true;
+					}else if( getPlayerMode(ThisPlayer) == 3 || getPlayerMode(ThisPlayer) == 4) {
+						Material ArrowMaterial;
+						try
+						{
+							ArrowMaterial = Material.getMaterial(Integer.parseInt(args[0]));
+						}
+						catch(NumberFormatException nfe)
+						{
+							ArrowMaterial = Material.getMaterial(args[0]);
+						}
+						try{
+							sender.sendMessage("[OddArrow] [ArrowMaterial "+ArrowMaterial.toString()+"]");
+							setArrowMaterial(ThisPlayer,ArrowMaterial);
+							return true;
+						}catch(NullPointerException e){
+							ThisPlayer.sendMessage("[OddArrow] Could not Find "+args[0]);
+							return false;
+						}		
+					}
+				}else{
+					setPlayerMode(ThisPlayer,getPlayerMode(ThisPlayer)+1);
+
+					switch (getPlayerMode(ThisPlayer)) {
+					case 0:
+						ThisPlayer.sendMessage("[OddArrow] [RappadFire]");
+						break;
+					case 1:
+						ThisPlayer.sendMessage("[OddArrow] [Remote Explosions] type (/boom) to detonate.");
+						break;		
+					case 2:
+						ThisPlayer.sendMessage("[OddArrow] [Create Light]");
+						break;	
+					case 3:
+						ThisPlayer.sendMessage("[OddArrow] [Replace With" + getArrowMaterial(ThisPlayer) + "]");
+						break;
+					case 4:
+						ThisPlayer.sendMessage("[OddArrow] [Create " + getArrowMaterial(ThisPlayer) + "]");
+						break;
+					case 5:
+						ThisPlayer.sendMessage("[OddArrow] [Topsoil removal]");
+						break;
+					case 6:
+						ThisPlayer.sendMessage("[OddArrow] [Lightning strike]");
+						break;
+					default:
+						ThisPlayer.sendMessage("[OddArrow] [Off]");
+						setPlayerMode(ThisPlayer, -1);
+						break;	
+					}
+					return true;
+				}
+			}
+
+		}else{
+			setIfPlayer((Player) sender, true);
+			return true;
+		}	
 		return false;
 	}
-	
-	
-	
-}
+}	
