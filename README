@@ -1,11 +1,11 @@
-Rapid:
+Rapid Fire:
 	Command: /oa Rapid
 	Description: Rapid Fire arrows Explode on contact with none LivingEntity.
 
-Remote:
+Remote Explosions:
 	Command: /oa Remote
 	Description: Remote explode arrows. Explode With /boom Command.
-Light:
+Create Light:
 	Command: /oa Light
 	Description: The block the arrow lands in will be set
 	
@@ -23,11 +23,11 @@ Create: Material
 	Command: /oa Create <Material>
 	Description: Sets the Material to use in Replace / Create  mode.
 	
-Topsoil:
+Topsoil removal:
 	Command: /oa Topsoil
 	Description: arrows Explode Clearing just  Dirt/Sand/etc... leaving  stone untouched.
 	
-Lightning:
+Lightning strike:
 	Command: /oa Lightning
 	Description: Strike Lightning where arrow lands on none LivingEntity.
 	
