@@ -84,9 +84,11 @@ public class PbEntityListener extends PlayerListener {
 					crateOddArrow(player);
 					//player.sendMessage("Arrow shot!");
 				}else{
+					if(plugin.Permission(player, "oddarrow.oa.allammo")){
 					event.getPlayer().sendMessage("You Have No Arrows!!");
 					event.getPlayer().getInventory().addItem(stack);
 					event.getPlayer().sendMessage("Have 64, go have some fun!!");
+					}
 				}
 			}else if(event.getAction()==Action.LEFT_CLICK_AIR){
 				//this cycles through effects when the user left clicks air with bow thanks skeletonofchaos!
