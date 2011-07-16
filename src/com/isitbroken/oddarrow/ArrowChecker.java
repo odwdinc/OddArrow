@@ -37,7 +37,7 @@ public class ArrowChecker extends EntityListener{
 		for(int arrow = 0; arrow < arrowList.size(); arrow++) {
 			Arrow ThisArrow = arrowList.get(arrow);
 			if (!ThisArrow.isDead()){
-				incoming.getWorld().createExplosion(ThisArrow.getLocation(),(float) 4);
+				incoming.getWorld().createExplosion(ThisArrow.getLocation(),(float) plugin.BlastSize);
 			}
 			ThisArrow.remove();
 			arrowList.remove(arrow);
@@ -49,7 +49,7 @@ public class ArrowChecker extends EntityListener{
 	public void ArrowTodo(Arrow arrow){
 		switch (arrowMode.get(arrow)) {
 		case 0://Raped
-		arrow.getWorld().createExplosion(arrow.getLocation(), (float) 5);
+		arrow.getWorld().createExplosion(arrow.getLocation(), (float) plugin.BlastSize);
 		arrow.remove();
 		break;
 		case 1://remote
@@ -109,6 +109,10 @@ public class ArrowChecker extends EntityListener{
 	public void onProjectileHit(ProjectileHitEvent event) {
 		if(event.getEntity() instanceof Arrow){
 			Arrow ThisArrow = (Arrow) event.getEntity();
+			
+			if(plugin.playerListener.arrowinzone(ThisArrow.getLocation()) == -1){
+				return;
+			}
 			if(arrows.contains(ThisArrow)){
 				ArrowTodo(ThisArrow);
 				if (arrows.contains(ThisArrow)){

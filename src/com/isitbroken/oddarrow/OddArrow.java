@@ -1,15 +1,22 @@
 package com.isitbroken.oddarrow;
 
 //import java.lang.Thread.State;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Properties;
 import java.util.logging.Logger;
 
+import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Arrow;
-import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event.Priority;
 import org.bukkit.event.Event.Type;
@@ -17,6 +24,7 @@ import org.bukkit.event.Event.Type;
 import org.bukkit.plugin.PluginDescriptionFile;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.scheduler.BukkitScheduler;
 
 import ru.tehkode.permissions.PermissionManager;
 import ru.tehkode.permissions.bukkit.PermissionsEx;
@@ -26,13 +34,27 @@ public class OddArrow extends JavaPlugin{
 	public static OddArrow plugin;
 	
 	ArrowChecker Arrowtask = new ArrowChecker(this);
+	ArrowEfectTask ArrowEfect = new ArrowEfectTask(this);
 	
 	public final HashMap<Player, Boolean > oddArrowEnabledHash = new HashMap<Player, Boolean>();
+	
 
+	ArrayList<Location> oddLocation = new ArrayList<Location>();
+	public final HashMap<Location, Double > oddArrowZoneSize = new HashMap<Location, Double>();
+	
+	
+	
 	public final Logger logger = Logger.getLogger("Minecraft");
 
 	PbEntityListener playerListener =  new PbEntityListener(this);
+	
+	static String mainDirectory = "plugins/OddArrow"; //sets the main directory for easy reference
+	static File OddArrowdat = new File(mainDirectory + File.separator + "OddArrow.properties");
+	static Properties prop = new Properties(); //creates a new properties file
 
+	
+	public int BlastSize;
+	
 	@Override
 	public void onDisable() {
 		
@@ -41,6 +63,25 @@ public class OddArrow extends JavaPlugin{
 
 	@Override
 	public void onEnable() {
+		new File(mainDirectory).mkdir();
+		if(!OddArrowdat.exists()){
+			try { //try catch clause explained below in tutorial
+				OddArrowdat.createNewFile(); //creates the file zones.dat
+				FileOutputStream out = new FileOutputStream(OddArrowdat); //creates a new output steam needed to write to the file
+				prop.put("BlastSize", "5"); //put the property ZoneCount with a value of 0 into the properties file, this will show up as ZoneCount=0 in the properties file.
+				prop.store(out, "Do NOT edit this config!"); //You need this line! It stores what you just put into the file and adds a comment.
+				out.flush();  //Explained below in tutorial
+				out.close(); //Closes the output stream as it is not needed anymore.
+			} catch (IOException ex) { 
+				ex.printStackTrace(); //explained below.
+			}
+		} else { 
+			try {
+				loadProcedure();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		} 
 		PluginManager pm = getServer().getPluginManager();		
 		pm.registerEvent(Type.PLAYER_INTERACT, playerListener, Priority.Normal, this);
 		pm.registerEvent(Type.PROJECTILE_HIT, Arrowtask, Priority.Normal, this);
@@ -49,9 +90,17 @@ public class OddArrow extends JavaPlugin{
 		this.logger.info( pdfFile.getName() + " version " + pdfFile.getVersion() + " is Enabled");
 		plugin = this;
 		setupCommands();
-        //bs.scheduleAsyncRepeatingTask(this, ArrowDubbleCheck, 1, 50);
+		
+		BukkitScheduler bs=this.getServer().getScheduler();
+        bs.scheduleAsyncRepeatingTask(this, ArrowEfect,0, 5);
 	}
 
+	
+	public void loadProcedure() throws IOException { 
+		FileInputStream in = new FileInputStream(OddArrowdat); //Creates the input stream
+		prop.load(in); //loads the file contents of zones ("in" which references to the zones file) from the input stream.
+		BlastSize = Integer.parseInt(prop.getProperty("BlastSize")); //explained below
+	}
 
 	public boolean isPlayer(final Player incoming){
 
@@ -188,25 +237,28 @@ public class OddArrow extends JavaPlugin{
 						}		
 						if(args[0].equalsIgnoreCase("debug")){
 							String Output ="";
-							List<Entity> debugEntities = ThisPlayer.getNearbyEntities(50, 50, 50);
+							List<Arrow> debugEntities = Arrowtask.arrows;
 							for (int i = 0; i < debugEntities.size(); i++){
-								if(debugEntities.get(i) instanceof Arrow){
-									Arrow ThisArrow = (Arrow) debugEntities.get(i);
-									
-									Output = Output + ThisArrow.toString();
-								}
+								Arrow ThisArrow =debugEntities.get(i);
+								Output = Output + ThisArrow.toString();
 							}
 							ThisPlayer.sendMessage("Curent Location = "+ ThisPlayer.getLocation().toString());
 							
-							ThisPlayer.sendMessage("Eye at Location = "+ ThisPlayer.getEyeLocation().toString());
+							ThisPlayer.sendMessage(" ");
 							
 							ThisPlayer.sendMessage("Arrow in list = "+ Output);
 							return true;
 						}
 						
 					}else if (args.length == 2 ){
-
-						if( playerListener.getArrowMode(ThisPlayer) == 3 || playerListener.getArrowMode(ThisPlayer) == 4) {
+						if(args[0].equalsIgnoreCase("loc")){
+							Location thisloction = ThisPlayer.getLocation();
+							oddLocation.add(thisloction);
+							oddArrowZoneSize.put(thisloction,(double) Integer.parseInt(args[1]));
+							sender.sendMessage("[OddArrow] New location set @ your Location Size:"+Integer.parseInt(args[1]));
+							return true;
+							
+						}else if( playerListener.getArrowMode(ThisPlayer) == 3 || playerListener.getArrowMode(ThisPlayer) == 4) {
 							Material ArrowMaterial;
 							try
 							{

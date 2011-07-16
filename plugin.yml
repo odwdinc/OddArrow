@@ -1,12 +1,12 @@
 name: OddArrow
 main: com.isitbroken.oddarrow.OddArrow
-version: 0.2.0
+version: 0.4.0
 description: A Odd plugin for Bukkit.
 commands:
 commands:
   oa:
     description: Set OddArrow Mode!!
-    usage: /oa <Rappad><Remote><Light><Replace><Create><Topsoil><Lightning><Off>, /oa <Replace><Create> <Material>
+    usage: /oa 
   boom:
     description: Make OddArrow Go Boom!!
     usage: /boom

@@ -2,6 +2,7 @@ package com.isitbroken.oddarrow;
 
 import java.util.HashMap;
 
+import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.entity.Arrow;
 import org.bukkit.entity.Player;
@@ -79,11 +80,37 @@ public class PbEntityListener extends PlayerListener {
 		
 	}
 	
+	public int arrowinzone(Location ToTest){
+		
+		ToTest.distance(ToTest);
+		
+		for(int oddloc = 0; oddloc < plugin.oddLocation.size(); oddloc++ ){
+			
+			//plugin.logger.info(plugin.oddLocation.get(oddloc).toString());
+			
+			double distance = ToTest.distance(plugin.oddLocation.get(oddloc));
+			
+			if(distance < plugin.oddArrowZoneSize.get(plugin.oddLocation.get(oddloc))){
+				return oddloc;
+			}
+		}
+		return -1;
+		
+	}
+	
 	public void onPlayerInteract (PlayerInteractEvent event)
 	{
 		Player player=event.getPlayer();
+			
 		if ((plugin.isPlayer(player)) && (event.getItem().getType() == Material.BOW)){
-			if(event.getAction()==Action.RIGHT_CLICK_AIR ){
+			
+			boolean inzone = false;
+			
+			if(arrowinzone(player.getLocation()) != -1){
+				inzone = true;
+			}
+			
+			if(event.getAction()==Action.RIGHT_CLICK_AIR && inzone ){
 				if (player.getInventory().contains(Material.ARROW)){
 					event.setCancelled(true);
 					crateOddArrow(player);
@@ -98,6 +125,8 @@ public class PbEntityListener extends PlayerListener {
 			}else if(event.getAction()==Action.LEFT_CLICK_AIR){
 				//this cycles through effects when the user left clicks air with bow thanks skeletonofchaos!
 				toggleArrowMode(player);	
+			}else{
+				//player.sendMessage("There are " +plugin.oddLocation.size() + " OddZones in game");
 			}
 		}
 
