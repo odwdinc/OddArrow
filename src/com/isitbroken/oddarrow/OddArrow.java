@@ -32,7 +32,7 @@ import ru.tehkode.permissions.bukkit.PermissionsEx;
 public class OddArrow extends JavaPlugin{
 
 	public static OddArrow plugin;
-	
+	public boolean UseLocation = false;
 	ArrowChecker Arrowtask = new ArrowChecker(this);
 	ArrowEfectTask ArrowEfect = new ArrowEfectTask(this);
 	
@@ -69,7 +69,8 @@ public class OddArrow extends JavaPlugin{
 				OddArrowdat.createNewFile(); //creates the file zones.dat
 				FileOutputStream out = new FileOutputStream(OddArrowdat); //creates a new output steam needed to write to the file
 				prop.put("BlastSize", "5"); //put the property ZoneCount with a value of 0 into the properties file, this will show up as ZoneCount=0 in the properties file.
-				prop.store(out, "Do NOT edit this config!"); //You need this line! It stores what you just put into the file and adds a comment.
+				prop.put("UseLocations", "False");
+				prop.store(out, "Edit this config!"); //You need this line! It stores what you just put into the file and adds a comment.
 				out.flush();  //Explained below in tutorial
 				out.close(); //Closes the output stream as it is not needed anymore.
 			} catch (IOException ex) { 
@@ -84,15 +85,17 @@ public class OddArrow extends JavaPlugin{
 		} 
 		PluginManager pm = getServer().getPluginManager();		
 		pm.registerEvent(Type.PLAYER_INTERACT, playerListener, Priority.Normal, this);
+		pm.registerEvent(Type.PLAYER_MOVE, playerListener, Priority.Normal, this);
 		pm.registerEvent(Type.PROJECTILE_HIT, Arrowtask, Priority.Normal, this);
 		
 		PluginDescriptionFile pdfFile = this.getDescription();
 		this.logger.info( pdfFile.getName() + " version " + pdfFile.getVersion() + " is Enabled");
 		plugin = this;
 		setupCommands();
+		this.logger.info( pdfFile.getName() + " BlastSize " + BlastSize);
 		
 		BukkitScheduler bs=this.getServer().getScheduler();
-        bs.scheduleAsyncRepeatingTask(this, ArrowEfect,0, 5);
+        bs.scheduleAsyncRepeatingTask(this, ArrowEfect,0, 30);
 	}
 
 	
@@ -100,6 +103,13 @@ public class OddArrow extends JavaPlugin{
 		FileInputStream in = new FileInputStream(OddArrowdat); //Creates the input stream
 		prop.load(in); //loads the file contents of zones ("in" which references to the zones file) from the input stream.
 		BlastSize = Integer.parseInt(prop.getProperty("BlastSize")); //explained below
+		
+		
+		if(prop.getProperty("UseLocations").equalsIgnoreCase("true")){
+			UseLocation = true;
+			
+		}
+		
 	}
 
 	public boolean isPlayer(final Player incoming){
@@ -128,7 +138,7 @@ public class OddArrow extends JavaPlugin{
 				return true;
 			}else{
 				player.sendMessage("You need permission "+permission);
-				return false;
+				return true;
 			}
 		}else{
 			return true;
@@ -251,7 +261,7 @@ public class OddArrow extends JavaPlugin{
 						}
 						
 					}else if (args.length == 2 ){
-						if(args[0].equalsIgnoreCase("loc")){
+						if(args[0].equalsIgnoreCase("loc") && Permission(ThisPlayer, "oddarrow.loc")){
 							Location thisloction = ThisPlayer.getLocation();
 							oddLocation.add(thisloction);
 							oddArrowZoneSize.put(thisloction,(double) Integer.parseInt(args[1]));
