@@ -68,10 +68,15 @@ public class PbEntityListener extends PlayerListener {
 	
 	
 	public void crateOddArrow(Player player)	{
+		try{
 		Arrow arrow = player.shootArrow();
 		plugin.Arrowtask.arrows.add(arrow);
 		plugin.Arrowtask.arrowMode.put(arrow, getArrowMode(player));
 		plugin.Arrowtask.arrowMaterial.put(arrow, getArrowMaterial(player));
+		} catch (ArrayIndexOutOfBoundsException e){
+			player.shootArrow();
+		}
+		
 	}
 	
 	public void onPlayerInteract (PlayerInteractEvent event)

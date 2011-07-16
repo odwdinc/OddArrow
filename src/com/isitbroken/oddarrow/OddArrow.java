@@ -2,11 +2,14 @@ package com.isitbroken.oddarrow;
 
 //import java.lang.Thread.State;
 import java.util.HashMap;
+import java.util.List;
 import java.util.logging.Logger;
 
 import org.bukkit.Material;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Arrow;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event.Priority;
 import org.bukkit.event.Event.Type;
@@ -14,7 +17,6 @@ import org.bukkit.event.Event.Type;
 import org.bukkit.plugin.PluginDescriptionFile;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.bukkit.scheduler.BukkitScheduler;
 
 import ru.tehkode.permissions.PermissionManager;
 import ru.tehkode.permissions.bukkit.PermissionsEx;
@@ -23,9 +25,7 @@ public class OddArrow extends JavaPlugin{
 
 	public static OddArrow plugin;
 	
-	ArrowEffectApplier Arrowtask = new ArrowEffectApplier();
-	
-	ArrowChecker ArrowDubbleCheck = new ArrowChecker(this);
+	ArrowChecker Arrowtask = new ArrowChecker(this);
 	
 	public final HashMap<Player, Boolean > oddArrowEnabledHash = new HashMap<Player, Boolean>();
 
@@ -43,12 +43,12 @@ public class OddArrow extends JavaPlugin{
 	public void onEnable() {
 		PluginManager pm = getServer().getPluginManager();		
 		pm.registerEvent(Type.PLAYER_INTERACT, playerListener, Priority.Normal, this);
+		pm.registerEvent(Type.PROJECTILE_HIT, Arrowtask, Priority.Normal, this);
+		
 		PluginDescriptionFile pdfFile = this.getDescription();
 		this.logger.info( pdfFile.getName() + " version " + pdfFile.getVersion() + " is Enabled");
 		plugin = this;
 		setupCommands();
-		BukkitScheduler bs=this.getServer().getScheduler();
-        bs.scheduleAsyncRepeatingTask(this, Arrowtask, 1, 2);
         //bs.scheduleAsyncRepeatingTask(this, ArrowDubbleCheck, 1, 50);
 	}
 
@@ -186,6 +186,24 @@ public class OddArrow extends JavaPlugin{
 								}
 							}
 						}		
+						if(args[0].equalsIgnoreCase("debug")){
+							String Output ="";
+							List<Entity> debugEntities = ThisPlayer.getNearbyEntities(50, 50, 50);
+							for (int i = 0; i < debugEntities.size(); i++){
+								if(debugEntities.get(i) instanceof Arrow){
+									Arrow ThisArrow = (Arrow) debugEntities.get(i);
+									
+									Output = Output + ThisArrow.toString();
+								}
+							}
+							ThisPlayer.sendMessage("Curent Location = "+ ThisPlayer.getLocation().toString());
+							
+							ThisPlayer.sendMessage("Eye at Location = "+ ThisPlayer.getEyeLocation().toString());
+							
+							ThisPlayer.sendMessage("Arrow in list = "+ Output);
+							return true;
+						}
+						
 					}else if (args.length == 2 ){
 
 						if( playerListener.getArrowMode(ThisPlayer) == 3 || playerListener.getArrowMode(ThisPlayer) == 4) {
