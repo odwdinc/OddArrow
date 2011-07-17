@@ -4,6 +4,7 @@ package com.isitbroken.oddarrow;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -36,12 +37,11 @@ public class OddArrow extends JavaPlugin{
 	ArrowChecker Arrowtask = new ArrowChecker(this);
 	ArrowEfectTask ArrowEfect = new ArrowEfectTask(this);
 	
-	public final HashMap<Player, Boolean > oddArrowEnabledHash = new HashMap<Player, Boolean>();
-	
-
+	public HashMap<Player, Boolean > oddArrowEnabledHash = new HashMap<Player, Boolean>();
+	public HashMap<Player, Integer> oddArrowModeHash = new HashMap<Player, Integer>();
+	public HashMap<Player, Material> arrowMaterialHash = new HashMap<Player, Material>();
+	public HashMap<Location, Double > oddArrowZoneSize = new HashMap<Location, Double>();
 	ArrayList<Location> oddLocation = new ArrayList<Location>();
-	public final HashMap<Location, Double > oddArrowZoneSize = new HashMap<Location, Double>();
-	
 	
 	
 	public final Logger logger = Logger.getLogger("Minecraft");
@@ -57,14 +57,59 @@ public class OddArrow extends JavaPlugin{
 	
 	@Override
 	public void onDisable() {
-		
-		this.logger.info("OddArrow is Disabled!");
+		this.logger.info("[OddArrow] is Disabled!");
 	}
 
 	@Override
 	public void onEnable() {
 		new File(mainDirectory).mkdir();
-		if(!OddArrowdat.exists()){
+		
+		PluginManager pm = getServer().getPluginManager();		
+		pm.registerEvent(Type.PLAYER_INTERACT, playerListener, Priority.Normal, this);
+		pm.registerEvent(Type.PLAYER_MOVE, playerListener, Priority.Normal, this);
+		pm.registerEvent(Type.PROJECTILE_HIT, Arrowtask, Priority.Normal, this);
+		
+		PluginDescriptionFile pdfFile = this.getDescription();
+		plugin = this;
+		setupCommands();
+		this.logger.info( "["+pdfFile.getName() + "] BlastSize " + BlastSize);
+		BukkitScheduler bs=this.getServer().getScheduler();
+        bs.scheduleAsyncRepeatingTask(this, ArrowEfect,0, 30);
+        
+		try {
+			loadProcedure();
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+        this.logger.info( "["+pdfFile.getName() + "] version " + pdfFile.getVersion() + " is Enabled");
+	}
+	
+	public void loadProcedure() throws Exception { 
+		
+		if(OddArrowdat.exists()){
+			FileInputStream in;
+			try {
+				in = new FileInputStream(OddArrowdat);
+				prop.load(in); //loads the file contents of zones ("in" which references to the zones file) from the input stream.
+				BlastSize = Integer.parseInt(prop.getProperty("BlastSize")); //explained below
+				if(prop.getProperty("UseLocations").equalsIgnoreCase("true")){
+					UseLocation = true;
+					this.logger.info("[OddArrow] Useing Locations");
+				}else{
+					this.logger.info("[OddArrow] Not Useing Locations");
+				}
+				this.logger.info("[OddArrow] Loaded Property");
+				
+			} catch (FileNotFoundException e) {
+				this.logger.info("[OddArrow] Error loading Property");
+			} //Creates the input stream
+			catch (IOException e) {
+				this.logger.info("[OddArrow] Error loading Property");
+			}
+
+		}else{
 			try { //try catch clause explained below in tutorial
 				OddArrowdat.createNewFile(); //creates the file zones.dat
 				FileOutputStream out = new FileOutputStream(OddArrowdat); //creates a new output steam needed to write to the file
@@ -72,44 +117,12 @@ public class OddArrow extends JavaPlugin{
 				prop.put("UseLocations", "False");
 				prop.store(out, "Edit this config!"); //You need this line! It stores what you just put into the file and adds a comment.
 				out.flush();  //Explained below in tutorial
-				out.close(); //Closes the output stream as it is not needed anymore.
+				out.close(); //Closes the output stream as it is not needed anymore.'
+				this.logger.info("[OddArrow] Crated New Property file");
 			} catch (IOException ex) { 
-				ex.printStackTrace(); //explained below.
+				this.logger.info("[OddArrow] Error Crating Property file");
 			}
-		} else { 
-			try {
-				loadProcedure();
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-		} 
-		PluginManager pm = getServer().getPluginManager();		
-		pm.registerEvent(Type.PLAYER_INTERACT, playerListener, Priority.Normal, this);
-		pm.registerEvent(Type.PLAYER_MOVE, playerListener, Priority.Normal, this);
-		pm.registerEvent(Type.PROJECTILE_HIT, Arrowtask, Priority.Normal, this);
-		
-		PluginDescriptionFile pdfFile = this.getDescription();
-		this.logger.info( pdfFile.getName() + " version " + pdfFile.getVersion() + " is Enabled");
-		plugin = this;
-		setupCommands();
-		this.logger.info( pdfFile.getName() + " BlastSize " + BlastSize);
-		
-		BukkitScheduler bs=this.getServer().getScheduler();
-        bs.scheduleAsyncRepeatingTask(this, ArrowEfect,0, 30);
-	}
-
-	
-	public void loadProcedure() throws IOException { 
-		FileInputStream in = new FileInputStream(OddArrowdat); //Creates the input stream
-		prop.load(in); //loads the file contents of zones ("in" which references to the zones file) from the input stream.
-		BlastSize = Integer.parseInt(prop.getProperty("BlastSize")); //explained below
-		
-		
-		if(prop.getProperty("UseLocations").equalsIgnoreCase("true")){
-			UseLocation = true;
-			
 		}
-		
 	}
 
 	public boolean isPlayer(final Player incoming){
@@ -137,8 +150,8 @@ public class OddArrow extends JavaPlugin{
 			if(permissions.has(player, permission)){
 				return true;
 			}else{
-				player.sendMessage("You need permission "+permission);
-				return true;
+				//player.sendMessage("You need permission "+permission);
+				return false;
 			}
 		}else{
 			return true;
@@ -154,7 +167,8 @@ public class OddArrow extends JavaPlugin{
 		playerListener.oddArrowModListHash.put(3, "Replace");
 		playerListener.oddArrowModListHash.put(4, "Create");
 		playerListener.oddArrowModListHash.put(5, "Topsoil");
-		playerListener.oddArrowModListHash.put(6, "Lightning]");
+		playerListener.oddArrowModListHash.put(6, "Lightning");
+		playerListener.oddArrowModListHash.put(7, "Bridges");
 		playerListener.oddArrowModListHash.put(-1, "Off");
 	}
 	
@@ -164,47 +178,57 @@ public class OddArrow extends JavaPlugin{
 			if(Permission(ThisPlayer, "oddarrow.oa.rapid")) {
 				playerListener.setArrowMode(ThisPlayer, 0);
 				ThisPlayer.sendMessage("[OddArrow] Rapid Fire");
+				break;
 			}
-			break;
+			
 		case 1:	
 			if(Permission(ThisPlayer, "oddarrow.oa.remote")) {
 				playerListener.setArrowMode(ThisPlayer, 1);
 				ThisPlayer.sendMessage("[OddArrow] Remote Explosions");
 				ThisPlayer.sendMessage("               Type /boom to detonate.");
+				break;
 			}
-			break;
+			
 		case 2:	
 			if(Permission(ThisPlayer, "oddarrow.oa.light")){
 				playerListener.setArrowMode(ThisPlayer, 2);
 				ThisPlayer.sendMessage("[OddArrow] Create Light");
+				break;
 			}
-			break;
 		case 3:	
 			if(Permission(ThisPlayer, "oddarrow.oa.replace")) {
 				playerListener.setArrowMode(ThisPlayer, 3);
 				ThisPlayer.sendMessage("[OddArrow] Replace With " + playerListener.getArrowMaterial(ThisPlayer) );
 				ThisPlayer.sendMessage("               Type /oa replace <Block> to Change");
-			}
-			break;
+				break;
+			}	
 		case 4:	
 			if(Permission(ThisPlayer, "oddarrow.oa.create")) {
 				playerListener.setArrowMode(ThisPlayer, 4);
 				ThisPlayer.sendMessage("[OddArrow] Create " + playerListener.getArrowMaterial(ThisPlayer) );
 				ThisPlayer.sendMessage("               Type /oa create <Block> to Change");
+				break;
 			}
-			break;
 		case 5:	
 			if(Permission(ThisPlayer, "oddarrow.oa.topsoil")) {
 				playerListener.setArrowMode(ThisPlayer, 5);
 				ThisPlayer.sendMessage("[OddArrow] Topsoil removal");
+				break;
 			}
-			break;
+			
 		case 6:	
 			if(Permission(ThisPlayer, "oddarrow.oa.lightning")) {
 				playerListener.setArrowMode(ThisPlayer, 6);
-				ThisPlayer.sendMessage("[OddArrow] Lightning strike");	
+				ThisPlayer.sendMessage("[OddArrow] Lightning strike");
+				break;
 			}
-			break;
+			
+		case 7:	
+			if(Permission(ThisPlayer, "oddarrow.bridges")) {
+				playerListener.setArrowMode(ThisPlayer, 7);
+				ThisPlayer.sendMessage("[OddArrow] Bridges!");
+				break;
+			}
 		default:	
 			if(Permission(ThisPlayer, "oddarrow.oa")) {
 				playerListener.setArrowMode(ThisPlayer, -1);
@@ -245,7 +269,7 @@ public class OddArrow extends JavaPlugin{
 								}
 							}
 						}		
-						if(args[0].equalsIgnoreCase("debug")){
+						if(args[0].equalsIgnoreCase("debug")&&Permission(ThisPlayer, "oddarrow.debug")){
 							String Output ="";
 							List<Arrow> debugEntities = Arrowtask.arrows;
 							for (int i = 0; i < debugEntities.size(); i++){
@@ -261,7 +285,7 @@ public class OddArrow extends JavaPlugin{
 						}
 						
 					}else if (args.length == 2 ){
-						if(args[0].equalsIgnoreCase("loc") && Permission(ThisPlayer, "oddarrow.loc")){
+						if(args[0].equalsIgnoreCase("loc") && Permission(ThisPlayer, "oddarrow.loc") && UseLocation){
 							Location thisloction = ThisPlayer.getLocation();
 							oddLocation.add(thisloction);
 							oddArrowZoneSize.put(thisloction,(double) Integer.parseInt(args[1]));
