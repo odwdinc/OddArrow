@@ -6,6 +6,7 @@ import java.util.List;
 
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.block.Block;
 import org.bukkit.entity.Arrow;
 import org.bukkit.entity.Player;
 import org.bukkit.event.entity.EntityListener;
@@ -47,6 +48,8 @@ public class ArrowChecker extends EntityListener{
 	}
 
 	public void ArrowTodo(Arrow arrow){
+		Location Arrowlocation;
+		Location playerlocation;
 		switch (arrowMode.get(arrow)) {
 		case 0://Raped
 		arrow.getWorld().createExplosion(arrow.getLocation(), (float) plugin.BlastSize);
@@ -83,9 +86,51 @@ public class ArrowChecker extends EntityListener{
 			arrow.getWorld().strikeLightning(arrow.getLocation());
 			arrow.remove();
 			break;
+		case 7://Bridges
+			Arrowlocation = arrow.getLocation().add(0, -1, 0);
+			playerlocation = arrow.getShooter().getLocation().add(0, -1, 0);			
+					
+			double distince2 = playerlocation.distanceSquared(Arrowlocation);
+			double distince = playerlocation.distance(Arrowlocation);
+			
+			Player thisplayer = (Player) arrow.getShooter();
+			
+			thisplayer.sendMessage("Distince = "+distince);
+			
+			for (double i= 0; i < distince2; i++ ){
+				
+				Location Templocation = bridgebulder(Arrowlocation,playerlocation,i);
+				
+				if (playerlocation.distance(Templocation) < distince){
+					Block thisblock = Templocation.getWorld().getBlockAt(Templocation);
+					if( thisblock.getType() == Material.AIR) thisblock.setType(Material.STONE);
+					
+				}
+			}
+			
+			arrow.remove();
+			break;
 		}
 
 	}
+	
+	public Location bridgebulder (Location to, Location form, double point){
+		
+		
+		point = point/50;
+		
+		Double TempX = (form.getX() + (to.getX() - form.getX() )*point);
+		Double TempY = (form.getY() + (to.getY() - form.getY() )*point);
+		Double TempZ = (form.getZ() + (to.getZ() - form.getZ() )*point);
+		
+		Location Temp = new Location(form.getWorld(),TempX,TempY,TempZ);
+				
+		//plugin.logger.info(Temp.toString());
+		return Temp;
+		
+	}
+	
+	
 
 	public void setMaterials(Arrow arrow, Material material, Integer value ){
 		if (value != 0 ){
