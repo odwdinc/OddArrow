@@ -116,7 +116,7 @@ public class PbEntityListener extends PlayerListener {
 					crateOddArrow(player);
 					//player.sendMessage("Arrow shot!");
 				}else{
-					if(plugin.Permission(player, "oddarrow.oa.allammo")){
+					if(player.hasPermission("oddarrow.oa.allammo")){
 					event.getPlayer().sendMessage("You Have No Arrows!!");
 					event.getPlayer().getInventory().addItem(stack);
 					event.getPlayer().sendMessage("Have 64, go have some fun!!");
