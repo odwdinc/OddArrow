@@ -147,7 +147,7 @@ public class ArrowChecker extends EntityListener{
 
 			Block thisblock = arrow.getWorld().getBlockAt(Arrowlocation);
 			thisblock.setType(Material.CHEST);
-			Chest thischest = (Chest) thisblock;
+			Chest thischest = (Chest) thisblock.getState();
 			Inventory inventory = thischest.getInventory();
 			plugin.inventorymanger.RandomInventory(inventory);
 			arrow.remove();

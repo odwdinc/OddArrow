@@ -19,39 +19,39 @@ public class InventoryManger {
 	private ItemStack DIAMOND;
 	
 	InventoryManger(){
-		SADDLE.setType(Material.SADDLE);
-		IRON_INGOT.setType(Material.IRON_INGOT);
-		BREAD.setType(Material.BREAD);
-		WHEAT.setType(Material.WHEAT);
-		SULPHUR.setType(Material.SULPHUR);
-		sSTRING.setType(Material.STRING);
-		BUCKET.setType(Material.BUCKET);
-		EGG.setType(Material.EGG);
+		SADDLE= new ItemStack(Material.SADDLE);
+		IRON_INGOT= new ItemStack(Material.IRON_INGOT);
+		BREAD= new ItemStack(Material.BREAD);
+		WHEAT= new ItemStack(Material.WHEAT);
+		SULPHUR= new ItemStack(Material.SULPHUR);
+		sSTRING= new ItemStack(Material.STRING);
+		BUCKET= new ItemStack(Material.BUCKET);
+		EGG= new ItemStack(Material.EGG);
 		
-		REDSTONE.setType(Material.REDSTONE);
-		RECORD.setType(Material.RECORD_5);
-		GOLDEN_APPLE.setType(Material.GOLDEN_APPLE);
-		DIAMOND.setType(Material.DIAMOND);
+		REDSTONE= new ItemStack(Material.REDSTONE);
+		RECORD= new ItemStack(Material.RECORD_5);
+		GOLDEN_APPLE= new ItemStack(Material.GOLDEN_APPLE);
+		DIAMOND= new ItemStack(Material.DIAMOND);
 	}
 
 	public void RandomInventory(Inventory inventory) {
 		int i;
 		
-		SADDLE.setAmount(0);
-		IRON_INGOT.setAmount(0);
-		BREAD.setAmount(0);
-		WHEAT.setAmount(0);
-		SULPHUR.setAmount(0);
-		sSTRING.setAmount(0);
-		BUCKET.setAmount(0);
-		EGG.setAmount(0);
-		REDSTONE.setAmount(0);
-		RECORD.setAmount(0);
-		GOLDEN_APPLE.setAmount(0);
-		DIAMOND.setAmount(0);
+		SADDLE.setAmount(-1);
+		IRON_INGOT.setAmount(-1);
+		BREAD.setAmount(-1);
+		WHEAT.setAmount(-1);
+		SULPHUR.setAmount(-1);
+		sSTRING.setAmount(-1);
+		BUCKET.setAmount(-1);
+		EGG.setAmount(-1);
+		REDSTONE.setAmount(-1);
+		RECORD.setAmount(-1);
+		GOLDEN_APPLE.setAmount(-1);
+		DIAMOND.setAmount(-1);
 		
 		for (i = 0; i < 10; i++){
-			if(Math.random() * 5 < 4){
+			if(Math.random() < .8){
 				if(SADDLE.getAmount()>1){
 					SADDLE.setAmount(SADDLE.getAmount()+1);
 				}
@@ -78,19 +78,19 @@ public class InventoryManger {
 				}
 
 			}
-			if(Math.random()*10 < 1){
+			if(Math.random() < .3){
 				//Redstone Dust	1⁄10 (10%)	 1-4
 				if(REDSTONE.getAmount()>4){
 					REDSTONE.setAmount(REDSTONE.getAmount()+1);
 				}
 			}
-			if(Math.random()*25 < 2){
+			if(Math.random() < .25){
 				//Music Discs	2⁄25 (8%)	 1
 				if(RECORD.getAmount()>1){
 					RECORD.setAmount(RECORD.getAmount()+1);
 				}
 			}
-			if(Math.random() * 100 < 8){
+			if(Math.random() < .01){
 				if(GOLDEN_APPLE.getAmount()>1){
 					GOLDEN_APPLE.setAmount(GOLDEN_APPLE.getAmount()+1);
 				}

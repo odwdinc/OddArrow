@@ -211,26 +211,26 @@ public class OddArrow extends JavaPlugin{
 			}
 
 		case 7:	
-			if(ThisPlayer.hasPermission("oddarrow.bridges")) {
+			if(ThisPlayer.hasPermission("oddarrow.oa.bridges")) {
 				playerListener.setArrowMode(ThisPlayer, 7);
 				ThisPlayer.sendMessage("["+pdfFile.getName() + "] Bridges!");
 				break;
 			}
 		case 8:	
-			if(ThisPlayer.hasPermission("oddarrow.mobs")) {
-				playerListener.setArrowMode(ThisPlayer, 7);
+			if(ThisPlayer.hasPermission("oddarrow.oa.mobs")) {
+				playerListener.setArrowMode(ThisPlayer, 8);
 				ThisPlayer.sendMessage("["+pdfFile.getName() + "] Mobs!");
 				break;
 			}
 		case 9:	
-			if(ThisPlayer.hasPermission("oddarrow.mtape")) {
-				playerListener.setArrowMode(ThisPlayer, 7);
+			if(ThisPlayer.hasPermission("oddarrow.oa.mtape")) {
+				playerListener.setArrowMode(ThisPlayer, 9);
 				ThisPlayer.sendMessage("["+pdfFile.getName() + "] Measuring Tape!");
 				break;
 			}
 		case 10:	
-			if(ThisPlayer.hasPermission("oddarrow.chests")) {
-				playerListener.setArrowMode(ThisPlayer, 7);
+			if(ThisPlayer.hasPermission("oddarrow.oa.chests")) {
+				playerListener.setArrowMode(ThisPlayer, 10);
 				ThisPlayer.sendMessage("["+pdfFile.getName() + "] Chests!");
 				break;
 			}
