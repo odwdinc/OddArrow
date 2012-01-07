@@ -1,47 +1,93 @@
 Rapid Fire:
 	Command: /oa Rapid
-	Description: Rapid Fire arrows Explode on contact with none LivingEntity.
+	Description: Rapid Fire arrows shot by player Explode on contact with none LivingEntity.
+	Permission: oddarrow.oa.rapid
 
 Remote Explosions:
 	Command: /oa Remote
-	Description: Remote explode arrows. Explode With /boom Command.
+	Description: Remote explode arrows. Explode With /boom Command. Allows the placement of many Remote detonator "mines". all arrows placed by player will explode when player types "/boom"
+	Permission: oddarrow.oa.remote
+
 Create Light:
 	Command: /oa Light
-	Description: The block the arrow lands in will be set
-	
+	Description: The block the arrow lands in will be set to GlowStone. This will create a "Light" of one GlowStone block.
+	Permission: oddarrow.oa.light
+
 Replace: Material
 	Command: /oa Replace
-	Description: Non air blocks will be Replace Where the arrow lands With set Material.
-		
+	Description: Non air blocks will be Replace Where the arrows shot by player lands. Blocks will be replace with the set Material.
+	Permission: oddarrow.oa.replace
 	Command: /oa Replace <Material>
-	Description: Sets the Material to use in Replace / Create  mode.
-	
+	Description: Sets the Material to use in Replace / Create mode.
+	example: /oa Replace stone -Will replace all block in a 2 block radius to stone wherever the arrow hits.
+	Permission: oddarrow.oa.Material.<BlockString>
+
 Create: Material
 	Command: /oa Create
-	Description: The Air/Lava/Water block the arrows is in on contact with Ground will be replaced with Material.
-		
+	Description: When the arrows shot by player lands. The Air/Lava/Water block the arrow is in will be replace with the set Material.
+	example: /oa Create stone -Will create one block of stone wherever arrow lands.
+	Permission: oddarrow.oa.create
 	Command: /oa Create <Material>
-	Description: Sets the Material to use in Replace / Create  mode.
-	
+	Description: Sets the Material to use in Replace / Create mode.
+	Permission: oddarrow.oa.Material.<BlockString>
+
 Topsoil removal:
 	Command: /oa Topsoil
-	Description: arrows Explode Clearing just  Dirt/Sand/etc... leaving  stone untouched.
-	
+	Description: When the arrows shot by player lands. the created explosion will Explode just Dirt/Sand/etc... leaving stone untouched.
+	Permission: oddarrow.oa.topsoil
+
 Lightning strike:
 	Command: /oa Lightning
 	Description: Strike Lightning where arrow lands on none LivingEntity.
+	Permission: oddarrow.oa.lightning
+
+Bridges:
+	Command: /oa Bridges
+	Description: Construct a 1 stone path form player to where arrow lands.
+	Permission: oddarrow.oa.bridges
+
+Mob Spawner: (By Request)
+	Command: /oa Mob
+	Description: if server allows Monsters then will spawn skeleton, if server allows animals then cow will be spawned.
+	Permission: oddarrow.oa.mobs
 	
+Measuring Tape:
+	Description: Prints out the distance arrow landed form player.
+	Permission: oddarrow.oa.mtape
+	
+Random Chests: (By Request)
+ 	Description: Spawns a random chest at the location of the arrow hit with dungeon like contents.
+	Permission: oddarrow.oa.chests
+
 Off:
 	Command: /oa Off
-	Description:  turn off OddArrows
+	Description: turn off OddArrows
+	Permission: oddarrow.oa
 
 Remove:
 	Command: /oar
-	Description: Remove your player from OddArrows	
-	
-	Command: /boom
+	Description: Remove your player from OddArrows
+	Permission: oddarrow.oa
+
+Command: /boom
 	Description: Used for Remote explode arrows
+	Permission: oddarrow.oa.boom
 	
-[Permissions]	
-PermissionsEx
-- com.isitbroken.oddarrow.permission
+Crate Location:
+	Command: /oa loc <Size>
+	Description: Adds a Odd location if UseLocations=true in OddArrow.properties, where <size> is the radius in block from your current position.
+	Permission: oddarrow.loc
+
+Features:
+	Internal tests tell when arrow is on ground, allows arrows to explode.
+	Using Fixed ProjectileHitEvent.
+	Construct Bridges.
+	Remote detonator "mines"
+	Create / replace blocks.
+	Build in Create mode.
+	Quickly clear topsoil from stone.
+	Fun zones! (aka player are limited to this zone)+V0.4!
+	
+Working on:
+	More arrows!
+	Using player inventory for Create mode
