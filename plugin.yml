@@ -1,6 +1,6 @@
 name: OddArrow
 main: com.isitbroken.oddarrow.OddArrow
-version: 0.5.0
+version: 0.7.0
 description: A Odd plugin for Bukkit.
 commands:
 commands:

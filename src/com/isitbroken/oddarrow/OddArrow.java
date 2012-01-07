@@ -25,14 +25,13 @@ import org.bukkit.event.Event.Type;
 import org.bukkit.plugin.PluginDescriptionFile;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.bukkit.scheduler.BukkitScheduler;
 
 public class OddArrow extends JavaPlugin{
 
 	public static OddArrow plugin;
 	public boolean UseLocation = false;
 	ArrowChecker Arrowtask = new ArrowChecker(this);
-	ArrowEfectTask ArrowEfect = new ArrowEfectTask(this);
+	//ArrowEfectTask ArrowEfect = new ArrowEfectTask(this);
 
 	public HashMap<Player, Boolean > oddArrowEnabledHash = new HashMap<Player, Boolean>();
 	public HashMap<Player, Integer> oddArrowModeHash = new HashMap<Player, Integer>();
@@ -51,6 +50,8 @@ public class OddArrow extends JavaPlugin{
 
 
 	public int BlastSize;
+	PluginDescriptionFile pdfFile;
+	public InventoryManger inventorymanger;
 
 	@Override
 	public void onDisable() {
@@ -60,18 +61,17 @@ public class OddArrow extends JavaPlugin{
 	@Override
 	public void onEnable() {
 		new File(mainDirectory).mkdir();
-
+		inventorymanger = new InventoryManger();
 		PluginManager pm = getServer().getPluginManager();		
 		pm.registerEvent(Type.PLAYER_INTERACT, playerListener, Priority.Normal, this);
 		pm.registerEvent(Type.PLAYER_MOVE, playerListener, Priority.Normal, this);
 		pm.registerEvent(Type.PROJECTILE_HIT, Arrowtask, Priority.Normal, this);
 
-		PluginDescriptionFile pdfFile = this.getDescription();
+		pdfFile = this.getDescription();
 		plugin = this;
 		setupCommands();
-		this.logger.info( "["+pdfFile.getName() + "] BlastSize " + BlastSize);
-		BukkitScheduler bs=this.getServer().getScheduler();
-		bs.scheduleAsyncRepeatingTask(this, ArrowEfect,0, 30);
+		//BukkitScheduler bs=this.getServer().getScheduler();
+		//bs.scheduleAsyncRepeatingTask(this, ArrowEfect,0, 30);
 
 		try {
 			loadProcedure();
@@ -91,19 +91,21 @@ public class OddArrow extends JavaPlugin{
 				in = new FileInputStream(OddArrowdat);
 				prop.load(in); //loads the file contents of zones ("in" which references to the zones file) from the input stream.
 				BlastSize = Integer.parseInt(prop.getProperty("BlastSize")); //explained below
+				this.logger.info( "["+pdfFile.getName() + "] BlastSize " + BlastSize);
+				
 				if(prop.getProperty("UseLocations").equalsIgnoreCase("true")){
 					UseLocation = true;
-					this.logger.info("[OddArrow] Useing Locations");
+					this.logger.info("["+pdfFile.getName() + "] Useing Locations");
 				}else{
-					this.logger.info("[OddArrow] Not Useing Locations");
+					this.logger.info("["+pdfFile.getName() + "] Not Useing Locations");
 				}
-				this.logger.info("[OddArrow] Loaded Property");
+				this.logger.info("["+pdfFile.getName() + "] Loaded Property");
 
 			} catch (FileNotFoundException e) {
-				this.logger.info("[OddArrow] Error loading Property");
+				this.logger.info("["+pdfFile.getName() + "] Error loading Property");
 			} //Creates the input stream
 			catch (IOException e) {
-				this.logger.info("[OddArrow] Error loading Property");
+				this.logger.info("["+pdfFile.getName() + "] Error loading Property");
 			}
 
 		}else{
@@ -115,9 +117,9 @@ public class OddArrow extends JavaPlugin{
 				prop.store(out, "Edit this config!"); //You need this line! It stores what you just put into the file and adds a comment.
 				out.flush();  //Explained below in tutorial
 				out.close(); //Closes the output stream as it is not needed anymore.'
-				this.logger.info("[OddArrow] Crated New Property file");
+				this.logger.info("["+pdfFile.getName() + "] Crated New Property file");
 			} catch (IOException ex) { 
-				this.logger.info("[OddArrow] Error Crating Property file");
+				this.logger.info("["+pdfFile.getName() + "] Error Crating Property file");
 			}
 		}
 	}
@@ -133,11 +135,11 @@ public class OddArrow extends JavaPlugin{
 	public void setIfPlayer(final Player incoming, final Boolean value){
 		if(value){
 			oddArrowEnabledHash.put(incoming, value);
-			incoming.sendMessage("[OddArrow] Welcomes you.");
+			incoming.sendMessage("["+pdfFile.getName() + "] Welcomes you.");
 			playerListener.setArrowMode(incoming, -1);
 		}else{
 			oddArrowEnabledHash.remove(incoming);
-			incoming.sendMessage("[OddArrow] Will miss you.");
+			incoming.sendMessage("["+pdfFile.getName() + "] Will miss you.");
 		}
 	}
 
@@ -151,6 +153,9 @@ public class OddArrow extends JavaPlugin{
 		playerListener.oddArrowModListHash.put(5, "Topsoil");
 		playerListener.oddArrowModListHash.put(6, "Lightning");
 		playerListener.oddArrowModListHash.put(7, "Bridges");
+		playerListener.oddArrowModListHash.put(8, "Mob");
+		playerListener.oddArrowModListHash.put(9, "Measuring Tape");
+		playerListener.oddArrowModListHash.put(10, "Chests");
 		playerListener.oddArrowModListHash.put(-1, "Off");
 	}
 
@@ -159,14 +164,14 @@ public class OddArrow extends JavaPlugin{
 		case 0:		
 			if(ThisPlayer.hasPermission("oddarrow.oa.rapid")) {
 				playerListener.setArrowMode(ThisPlayer, 0);
-				ThisPlayer.sendMessage("[OddArrow] Rapid Fire");
+				ThisPlayer.sendMessage("["+pdfFile.getName() + "] Rapid Fire");
 				break;
 			}
 
 		case 1:	
 			if(ThisPlayer.hasPermission("oddarrow.oa.remote")) {
 				playerListener.setArrowMode(ThisPlayer, 1);
-				ThisPlayer.sendMessage("[OddArrow] Remote Explosions");
+				ThisPlayer.sendMessage("["+pdfFile.getName() + "] Remote Explosions");
 				ThisPlayer.sendMessage("               Type /boom to detonate.");
 				break;
 			}
@@ -174,47 +179,65 @@ public class OddArrow extends JavaPlugin{
 		case 2:	
 			if(ThisPlayer.hasPermission("oddarrow.oa.light")){
 				playerListener.setArrowMode(ThisPlayer, 2);
-				ThisPlayer.sendMessage("[OddArrow] Create Light");
+				ThisPlayer.sendMessage("["+pdfFile.getName() + "] Create Light");
 				break;
 			}
 		case 3:	
 			if(ThisPlayer.hasPermission("oddarrow.oa.replace")) {
 				playerListener.setArrowMode(ThisPlayer, 3);
-				ThisPlayer.sendMessage("[OddArrow] Replace With " + playerListener.getArrowMaterial(ThisPlayer) );
+				ThisPlayer.sendMessage("["+pdfFile.getName() + "] Replace With " + playerListener.getArrowMaterial(ThisPlayer) );
 				ThisPlayer.sendMessage("               Type /oa replace <Block> to Change");
 				break;
 			}	
 		case 4:	
 			if(ThisPlayer.hasPermission("oddarrow.oa.create")) {
 				playerListener.setArrowMode(ThisPlayer, 4);
-				ThisPlayer.sendMessage("[OddArrow] Create " + playerListener.getArrowMaterial(ThisPlayer) );
+				ThisPlayer.sendMessage("["+pdfFile.getName() + "] Create " + playerListener.getArrowMaterial(ThisPlayer) );
 				ThisPlayer.sendMessage("               Type /oa create <Block> to Change");
 				break;
 			}
 		case 5:	
 			if(ThisPlayer.hasPermission("oddarrow.oa.topsoil")) {
 				playerListener.setArrowMode(ThisPlayer, 5);
-				ThisPlayer.sendMessage("[OddArrow] Topsoil removal");
+				ThisPlayer.sendMessage("["+pdfFile.getName() + "] Topsoil removal");
 				break;
 			}
 
 		case 6:	
 			if(ThisPlayer.hasPermission("oddarrow.oa.lightning")) {
 				playerListener.setArrowMode(ThisPlayer, 6);
-				ThisPlayer.sendMessage("[OddArrow] Lightning strike");
+				ThisPlayer.sendMessage("["+pdfFile.getName() + "] Lightning strike");
 				break;
 			}
 
 		case 7:	
 			if(ThisPlayer.hasPermission("oddarrow.bridges")) {
 				playerListener.setArrowMode(ThisPlayer, 7);
-				ThisPlayer.sendMessage("[OddArrow] Bridges!");
+				ThisPlayer.sendMessage("["+pdfFile.getName() + "] Bridges!");
+				break;
+			}
+		case 8:	
+			if(ThisPlayer.hasPermission("oddarrow.mobs")) {
+				playerListener.setArrowMode(ThisPlayer, 7);
+				ThisPlayer.sendMessage("["+pdfFile.getName() + "] Mobs!");
+				break;
+			}
+		case 9:	
+			if(ThisPlayer.hasPermission("oddarrow.mtape")) {
+				playerListener.setArrowMode(ThisPlayer, 7);
+				ThisPlayer.sendMessage("["+pdfFile.getName() + "] Measuring Tape!");
+				break;
+			}
+		case 10:	
+			if(ThisPlayer.hasPermission("oddarrow.chests")) {
+				playerListener.setArrowMode(ThisPlayer, 7);
+				ThisPlayer.sendMessage("["+pdfFile.getName() + "] Chests!");
 				break;
 			}
 		default:	
 			if(ThisPlayer.hasPermission("oddarrow.oa")) {
 				playerListener.setArrowMode(ThisPlayer, -1);
-				ThisPlayer.sendMessage("[OddArrow] [Off]");
+				ThisPlayer.sendMessage("["+pdfFile.getName() + "] [Off]");
 			}
 			break;
 		}
@@ -234,7 +257,7 @@ public class OddArrow extends JavaPlugin{
 
 					if (commandLable.equalsIgnoreCase("oar") && ThisPlayer.hasPermission("oddarrow.oa")){
 						setIfPlayer(ThisPlayer,false);
-						sender.sendMessage("[OddArrow] Disabled.");
+						sender.sendMessage("["+pdfFile.getName() + "] Disabled.");
 						return true;
 					}
 
@@ -271,7 +294,7 @@ public class OddArrow extends JavaPlugin{
 								Location thisloction = ThisPlayer.getLocation();
 								oddLocation.add(thisloction);
 								oddArrowZoneSize.put(thisloction,(double) Integer.parseInt(args[1]));
-								sender.sendMessage("[OddArrow] New location set @ your Location Size:"+Integer.parseInt(args[1]));
+								sender.sendMessage("["+pdfFile.getName() + "] New location set @ your Location Size:"+Integer.parseInt(args[1]));
 								return true;
 
 							}else if( playerListener.getArrowMode(ThisPlayer) == 3 || playerListener.getArrowMode(ThisPlayer) == 4) {
@@ -292,7 +315,7 @@ public class OddArrow extends JavaPlugin{
 										return true;
 									}
 								}catch(NullPointerException e){
-									ThisPlayer.sendMessage("[OddArrow] Could not Find "+args[1]);
+									ThisPlayer.sendMessage("["+pdfFile.getName() + "] Could not Find "+args[1]);
 									return false;
 								}
 
@@ -312,5 +335,6 @@ public class OddArrow extends JavaPlugin{
 			}
 			return true;
 		}
+		return false;
 	}
 }	

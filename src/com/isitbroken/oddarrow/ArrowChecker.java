@@ -4,13 +4,18 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import org.bukkit.Effect;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
+import org.bukkit.block.Chest;
+import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Arrow;
+import org.bukkit.entity.CreatureType;
 import org.bukkit.entity.Player;
 import org.bukkit.event.entity.EntityListener;
 import org.bukkit.event.entity.ProjectileHitEvent;
+import org.bukkit.inventory.Inventory;
 
 public class ArrowChecker extends EntityListener{
 	private OddArrow plugin;
@@ -50,6 +55,9 @@ public class ArrowChecker extends EntityListener{
 	public void ArrowTodo(Arrow arrow){
 		Location Arrowlocation;
 		Location playerlocation;
+		double distince2;
+		double distince;
+		CommandSender thisplayer;
 		switch (arrowMode.get(arrow)) {
 		case 0://Raped
 		arrow.getWorld().createExplosion(arrow.getLocation(), (float) plugin.BlastSize);
@@ -90,10 +98,10 @@ public class ArrowChecker extends EntityListener{
 			Arrowlocation = arrow.getLocation().add(0, -1, 0);
 			playerlocation = arrow.getShooter().getLocation().add(0, -1, 0);			
 					
-			double distince2 = playerlocation.distanceSquared(Arrowlocation);
-			double distince = playerlocation.distance(Arrowlocation);
+			distince2 = playerlocation.distanceSquared(Arrowlocation);
+			distince = playerlocation.distance(Arrowlocation);
 			
-			Player thisplayer = (Player) arrow.getShooter();
+			thisplayer = (Player) arrow.getShooter();
 			
 			thisplayer.sendMessage("Distince = "+distince);
 			
@@ -110,10 +118,43 @@ public class ArrowChecker extends EntityListener{
 			
 			arrow.remove();
 			break;
+		case 8://Mobs
+			if(arrow.getWorld().getAllowMonsters()){
+				arrow.getWorld().playEffect(arrow.getLocation(), Effect.SMOKE, 10);
+				arrow.getWorld().spawnCreature(arrow.getLocation(),CreatureType.SKELETON);
+			}else if(arrow.getWorld().getAllowAnimals()){
+				arrow.getWorld().playEffect(arrow.getLocation(), Effect.SMOKE, 10);
+				arrow.getWorld().spawnCreature(arrow.getLocation(),CreatureType.COW);
+			}else{
+				arrow.getWorld().playEffect(arrow.getLocation(), Effect.SMOKE, 10);
+			}
+			
+			arrow.remove();
+			break;
+		case 9://Measuring Tape
+			Arrowlocation = arrow.getLocation().add(0, -1, 0);
+			playerlocation = arrow.getShooter().getLocation().add(0, -1, 0);			
+					
+			distince2 = playerlocation.distanceSquared(Arrowlocation);
+			distince = playerlocation.distance(Arrowlocation);
+			
+			thisplayer = (Player) arrow.getShooter();
+			
+			thisplayer.sendMessage("Distince = "+distince);
+			break;
+		case 10://Chests
+			Arrowlocation = arrow.getLocation();
+
+			Block thisblock = arrow.getWorld().getBlockAt(Arrowlocation);
+			thisblock.setType(Material.CHEST);
+			Chest thischest = (Chest) thisblock;
+			Inventory inventory = thischest.getInventory();
+			plugin.inventorymanger.RandomInventory(inventory);
+			arrow.remove();
+			break;
 		}
 
 	}
-	
 	public Location bridgebulder (Location to, Location form, double point){
 		
 		
@@ -152,12 +193,18 @@ public class ArrowChecker extends EntityListener{
 	}
 	
 	public void onProjectileHit(ProjectileHitEvent event) {
+				
 		if(event.getEntity() instanceof Arrow){
 			Arrow ThisArrow = (Arrow) event.getEntity();
 			
-			if(plugin.playerListener.arrowinzone(ThisArrow.getLocation()) == -1){
-				return;
+			
+			
+			if(plugin.UseLocation){
+				if(plugin.playerListener.arrowinzone(ThisArrow.getLocation()) == -1){
+					return;
+				}
 			}
+			
 			if(arrows.contains(ThisArrow)){
 				ArrowTodo(ThisArrow);
 				if (arrows.contains(ThisArrow)){
@@ -165,8 +212,10 @@ public class ArrowChecker extends EntityListener{
 				}
 			}else if(plugin.isPlayer((Player) ThisArrow.getShooter())){
 				//try {	
-					arrowMode.put(ThisArrow, plugin.playerListener.getArrowMode((Player) ThisArrow.getShooter()));
-					arrowMaterial.put(ThisArrow, plugin.playerListener.getArrowMaterial((Player) ThisArrow.getShooter()));
+					Player plu = (Player) ThisArrow.getShooter();
+					//plu.sendMessage("arrow hit");
+					arrowMode.put(ThisArrow, plugin.playerListener.getArrowMode(plu));
+					arrowMaterial.put(ThisArrow, plugin.playerListener.getArrowMaterial(plu));
 					ArrowTodo(ThisArrow);
 				//} catch (NullPointerException e) {
 					//ThisArrow.remove();
