@@ -50,6 +50,7 @@ public class OddArrow extends JavaPlugin{
 
 	PbEntityListener playerListener =  new PbEntityListener(this);
 	PbBlockListener blockListener =  new PbBlockListener(this);
+	InventoryManger inventorymanger = new InventoryManger(this);
 	
 	static String mainDirectory = "plugins/OddArrow"; //sets the main directory for easy reference
 	static File OddArrowdat = new File(mainDirectory + File.separator + "OddArrow.properties");
@@ -57,8 +58,7 @@ public class OddArrow extends JavaPlugin{
 
 
 	public int BlastSize;
-	PluginDescriptionFile pdfFile;
-	public InventoryManger inventorymanger;
+	PluginDescriptionFile pdfFile; 
 	boolean UseInventory;
 	Material BridgeMaterial = Material.getMaterial(5);
 	boolean UseProtectedLocations;
@@ -73,13 +73,11 @@ public class OddArrow extends JavaPlugin{
 	@Override
 	public void onEnable() {
 		new File(mainDirectory).mkdir();
-		inventorymanger = new InventoryManger();
 		PluginManager pm = getServer().getPluginManager();		
 		pm.registerEvent(Type.PLAYER_INTERACT, playerListener, Priority.Normal, this);
 		pm.registerEvent(Type.PLAYER_MOVE, playerListener, Priority.Normal, this);
 		pm.registerEvent(Type.PROJECTILE_HIT, Arrowtask, Priority.Normal, this);
-		pm.registerEvent(Type.BLOCK_BREAK, blockListener, Priority.Normal, this);
-		
+		pm.registerEvent(Type.BLOCK_BREAK, blockListener, Priority.Normal, this);		
 		pdfFile = this.getDescription();
 		plugin = this;
 		setupCommands();
@@ -234,6 +232,7 @@ public class OddArrow extends JavaPlugin{
 	}
 
 	public void PlayerMode(Player ThisPlayer, Integer Mode){
+		
 		switch (Mode) {
 		case 0:		
 			if(ThisPlayer.hasPermission("oddarrow.oam.rapid")) {
@@ -373,7 +372,7 @@ public class OddArrow extends JavaPlugin{
 								sender.sendMessage("["+pdfFile.getName() + "] New location set @ your Location Size:"+Integer.parseInt(args[1]));
 								return true;
 
-							}if(args[0].equalsIgnoreCase("Ploc") && ThisPlayer.hasPermission("oddarrow.ploc") && UseProtectedLocations){
+							}if(args[0].equalsIgnoreCase("ploc") && ThisPlayer.hasPermission("oddarrow.ploc") && UseProtectedLocations){
 								Location thisloction = ThisPlayer.getLocation();
 								PoddLocation.add(thisloction);
 								oddArrowZoneSize.put(thisloction,(double) Integer.parseInt(args[1]));

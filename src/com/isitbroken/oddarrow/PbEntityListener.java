@@ -10,6 +10,7 @@ import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerListener;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.PlayerInventory;
 
 
 public class PbEntityListener extends PlayerListener {
@@ -111,11 +112,20 @@ public class PbEntityListener extends PlayerListener {
 		
 	}
 	
-	
 	public void onPlayerInteract (PlayerInteractEvent event)
 	{
 		Player player=event.getPlayer();
-			
+		if (plugin.isPlayer(player) && plugin.UseInventory){
+			PlayerInventory inventory = player.getInventory();
+			ItemStack item = inventory.getItem(8);
+			if(item != null){
+				Material met = item.getType();
+				if(!met.equals(Material.AIR)){
+					plugin.playerListener.setArrowMaterial(player, met);
+				}
+			}
+		}
+				
 		if ((plugin.isPlayer(player)) && (event.getItem().getType() == Material.BOW)){
 			
 			boolean inzone = arrowinzone(player.getLocation());
@@ -134,7 +144,7 @@ public class PbEntityListener extends PlayerListener {
 				}
 			}else if(event.getAction()==Action.LEFT_CLICK_AIR){
 				//this cycles through effects when the user left clicks air with bow thanks skeletonofchaos!
-				toggleArrowMode(player);	
+				toggleArrowMode(player);
 			}else{
 				//player.sendMessage("There are " +plugin.oddLocation.size() + " OddZones in game");
 			}

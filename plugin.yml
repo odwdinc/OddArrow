@@ -1,12 +1,12 @@
 name: OddArrow
 main: com.isitbroken.oddarrow.OddArrow
-version: 0.7.0
+version: 0.8.0
 description: A Odd plugin for Bukkit.
 commands:
 commands:
   oa:
     description: Set OddArrow Mode!!
-    usage: /oa 
+    usage: /oa (debug/loc/Ploc)
   boom:
     description: Make OddArrow Go Boom!!
     usage: /boom

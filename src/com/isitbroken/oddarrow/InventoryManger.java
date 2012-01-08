@@ -4,7 +4,7 @@ import org.bukkit.Material;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
-public class InventoryManger {
+public class InventoryManger{
 	private ItemStack SADDLE;
 	private ItemStack IRON_INGOT;
 	private ItemStack BREAD;
@@ -18,7 +18,7 @@ public class InventoryManger {
 	private ItemStack GOLDEN_APPLE;
 	private ItemStack DIAMOND;
 	
-	InventoryManger(){
+	InventoryManger(OddArrow oddArrow){
 		SADDLE= new ItemStack(Material.SADDLE);
 		IRON_INGOT= new ItemStack(Material.IRON_INGOT);
 		BREAD= new ItemStack(Material.BREAD);
@@ -32,7 +32,9 @@ public class InventoryManger {
 		RECORD= new ItemStack(Material.RECORD_5);
 		GOLDEN_APPLE= new ItemStack(Material.GOLDEN_APPLE);
 		DIAMOND= new ItemStack(Material.DIAMOND);
+		
 	}
+	
 
 	public void RandomInventory(Inventory inventory) {
 		int i;

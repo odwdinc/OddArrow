@@ -16,6 +16,8 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.entity.EntityListener;
 import org.bukkit.event.entity.ProjectileHitEvent;
 import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.PlayerInventory;
 
 public class ArrowChecker extends EntityListener{
 	private OddArrow plugin;
@@ -75,18 +77,16 @@ public class ArrowChecker extends EntityListener{
 			}
 			break;		
 		case 2://light
-			if(!plugin.LightMaterialHash.containsKey(arrow.getLocation())){
-				plugin.LightMaterialHash.put(arrow.getWorld().getBlockAt(arrow.getLocation()), arrow.getWorld().getBlockAt(arrow.getLocation()).getType());
-			}
-			setMaterials(arrow, Material.GLOWSTONE, 0);
+			setMaterials(arrow, Material.GLOWSTONE, 1,false,true);
 			arrow.remove();
 			break;	
 		case 3: //replace
-			setMaterials(arrow, arrowMaterial.get(arrow), 2);
+			
+			setMaterials(arrow, arrowMaterial.get(arrow), 2,plugin.UseInventory,false);
 			arrow.remove();
 			break;
 		case 4://crate
-			setMaterials(arrow, arrowMaterial.get(arrow), 0);
+			setMaterials(arrow, arrowMaterial.get(arrow), 0,plugin.UseInventory,false);
 			arrow.remove();
 			break;	
 		case 5://top
@@ -106,8 +106,8 @@ public class ArrowChecker extends EntityListener{
 			
 			thisplayer = (Player) arrow.getShooter();
 			
-			thisplayer.sendMessage("Distince = "+distince);
-			
+			thisplayer.sendMessage("Distance = "+distince);
+			loop:
 			for (double i= 0; i < distince2; i++ ){
 				
 				Location Templocation = bridgebulder(Arrowlocation,playerlocation,i);
@@ -115,7 +115,13 @@ public class ArrowChecker extends EntityListener{
 				if (playerlocation.distance(Templocation) < distince){
 					Block thisblock = Templocation.getWorld().getBlockAt(Templocation);
 					if( thisblock.getType() == Material.AIR) {
-						thisblock.setType(plugin.BridgeMaterial);
+						if(plugin.UseInventory){
+							if(!setMaterials(arrow, arrowMaterial.get(arrow), 0,plugin.UseInventory,false)){
+								break loop;
+							}
+						}else{
+							thisblock.setType(plugin.BridgeMaterial);
+						}
 					}
 					
 				}
@@ -145,11 +151,11 @@ public class ArrowChecker extends EntityListener{
 			
 			thisplayer = (Player) arrow.getShooter();
 			
-			thisplayer.sendMessage("Distince = "+distince);
+			thisplayer.sendMessage("Distance = "+distince);
 			break;
 		case 10://Chests
 			Arrowlocation = arrow.getLocation();
-
+			
 			Block thisblock = arrow.getWorld().getBlockAt(Arrowlocation);
 			thisblock.setType(Material.CHEST);
 			Chest thischest = (Chest) thisblock.getState();
@@ -172,23 +178,83 @@ public class ArrowChecker extends EntityListener{
 	
 	
 
-	public void setMaterials(Arrow arrow, Material material, Integer value ){
+	public boolean setMaterials(Arrow arrow, Material material, Integer value, boolean b, boolean c ){
+		Player temp = (Player) arrow.getShooter();
+		PlayerInventory inv = temp.getInventory();
+		ItemStack tempstack = new ItemStack(material);
+		tempstack.setAmount(1);
+		
+		if(b){
+			if(!material.isBlock()){
+				temp.sendMessage("You can not do that with "+ material.name());
+				return false;
+			}
+			if (value == 2 ){
+				if (inv.contains(material, 16)){
+					value = 2;
+				}else if(inv.contains(material, 4)){
+					value = 1;
+				}else{
+					temp.sendMessage("You have not enough "+ material.name());
+					return false;
+	
+				}
+			}
+		}
 		if (value != 0 ){
 			for(int x = -1*value; x < value; x++){
 				for(int y = -1*value; y < value; y++){
 					for(int z = -1*value; z < value; z++){				
 						Location newlocation = new Location(arrow.getWorld(), arrow.getLocation().getX()+x,  arrow.getLocation().getY()+y,  arrow.getLocation().getZ()+z);
 						if(!(arrow.getWorld().getBlockAt(newlocation).getType() == Material.AIR) ){
-							arrow.getWorld().getBlockAt(newlocation).setType(material);
+							if(!b){
+								if(c){
+									if(!plugin.LightMaterialHash.containsKey(newlocation.getBlock())){
+										plugin.LightMaterialHash.put(newlocation.getBlock(), newlocation.getBlock().getType());
+									}
+								}
+								arrow.getWorld().getBlockAt(newlocation).setType(material);
+								
+							}else{
+								if(inv.contains(material, 1)){
+									HashMap<Integer, ItemStack> list = inv.removeItem(tempstack);
+									if(list.size() == 0){
+										arrow.getWorld().getBlockAt(newlocation).setType(material);
+									}else{
+										temp.sendMessage("You have no more "+ material.name());
+										return false;
+									}
+								}else{
+									temp.sendMessage("You have no more "+ material.name());
+									return false;
+								}
+								
+							}
+							
 						}
 					}
 				}
 
 			}
 		}else{
-			arrow.getWorld().getBlockAt(arrow.getLocation()).setType(arrowMaterial.get(arrow));
+			if(!b){
+				arrow.getWorld().getBlockAt(arrow.getLocation()).setType(material);
+			}else{
+				if(inv.contains(material, 1)){
+					HashMap<Integer, ItemStack> list = inv.removeItem(tempstack);
+					if(list.size() == 0){
+						arrow.getWorld().getBlockAt(arrow.getLocation()).setType(material);
+					}else{
+						temp.sendMessage("You have no more "+ material.name());
+					}
+				}else{
+					temp.sendMessage("You have no more "+ material.name());
+					return false;
+				}
+				
+			}
 		}
-
+		return true;
 	}
 	
 	public void onProjectileHit(ProjectileHitEvent event) {
@@ -202,6 +268,9 @@ public class ArrowChecker extends EntityListener{
 					return;
 			}
 			
+			if(ThisArrow.getShooter() instanceof Player == false){
+				return;
+			}
 			if(arrows.contains(ThisArrow)){
 				ArrowTodo(ThisArrow);
 				if (arrows.contains(ThisArrow)){
