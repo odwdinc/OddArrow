@@ -75,7 +75,10 @@ public class ArrowChecker extends EntityListener{
 			}
 			break;		
 		case 2://light
-			setMaterials(arrow, Material.GLOWSTONE, 1);
+			if(!plugin.LightMaterialHash.containsKey(arrow.getLocation())){
+				plugin.LightMaterialHash.put(arrow.getWorld().getBlockAt(arrow.getLocation()), arrow.getWorld().getBlockAt(arrow.getLocation()).getType());
+			}
+			setMaterials(arrow, Material.GLOWSTONE, 0);
 			arrow.remove();
 			break;	
 		case 3: //replace
@@ -111,7 +114,9 @@ public class ArrowChecker extends EntityListener{
 				
 				if (playerlocation.distance(Templocation) < distince){
 					Block thisblock = Templocation.getWorld().getBlockAt(Templocation);
-					if( thisblock.getType() == Material.AIR) thisblock.setType(Material.STONE);
+					if( thisblock.getType() == Material.AIR) {
+						thisblock.setType(plugin.BridgeMaterial);
+					}
 					
 				}
 			}
@@ -156,17 +161,11 @@ public class ArrowChecker extends EntityListener{
 
 	}
 	public Location bridgebulder (Location to, Location form, double point){
-		
-		
 		point = point/50;
-		
 		Double TempX = (form.getX() + (to.getX() - form.getX() )*point);
 		Double TempY = (form.getY() + (to.getY() - form.getY() )*point);
 		Double TempZ = (form.getZ() + (to.getZ() - form.getZ() )*point);
-		
 		Location Temp = new Location(form.getWorld(),TempX,TempY,TempZ);
-				
-		//plugin.logger.info(Temp.toString());
 		return Temp;
 		
 	}
@@ -198,11 +197,9 @@ public class ArrowChecker extends EntityListener{
 			Arrow ThisArrow = (Arrow) event.getEntity();
 			
 			
-			
-			if(plugin.UseLocation){
-				if(plugin.playerListener.arrowinzone(ThisArrow.getLocation()) == -1){
+		
+			if(!plugin.playerListener.arrowinzone(ThisArrow.getLocation())){
 					return;
-				}
 			}
 			
 			if(arrows.contains(ThisArrow)){

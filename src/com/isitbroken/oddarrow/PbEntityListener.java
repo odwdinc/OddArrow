@@ -80,23 +80,37 @@ public class PbEntityListener extends PlayerListener {
 		
 	}
 	
-	public int arrowinzone(Location ToTest){
-		
-		ToTest.distance(ToTest);
-		
-		for(int oddloc = 0; oddloc < plugin.oddLocation.size(); oddloc++ ){
+	public boolean arrowinzone(Location ToTest){
+		if(plugin.UseProtectedLocations){
+			for(int oddloc = 0; oddloc < plugin.PoddLocation.size(); oddloc++ ){
 			
-			//plugin.logger.info(plugin.oddLocation.get(oddloc).toString());
+				double distance = ToTest.distance(plugin.PoddLocation.get(oddloc));
 			
-			double distance = ToTest.distance(plugin.oddLocation.get(oddloc));
-			
-			if(distance < plugin.oddArrowZoneSize.get(plugin.oddLocation.get(oddloc))){
-				return oddloc;
+				if(distance < plugin.PoddArrowZoneSize.get(plugin.PoddLocation.get(oddloc))){
+					return false;
+				}
 			}
 		}
-		return -1;
+		if(plugin.UseProtectedLocations && !plugin.UseLocation){
+			return false;
+		}
+		if(plugin.UseLocation){
+			for(int oddloc = 0; oddloc < plugin.oddLocation.size(); oddloc++ ){
+				
+				double distance = ToTest.distance(plugin.oddLocation.get(oddloc));
+				
+				if(distance < plugin.oddArrowZoneSize.get(plugin.oddLocation.get(oddloc))){
+					return true;
+				}
+			}
+		}
+		if(!plugin.UseProtectedLocations && !plugin.UseLocation){
+			return true;
+		}
+		return false;
 		
 	}
+	
 	
 	public void onPlayerInteract (PlayerInteractEvent event)
 	{
@@ -104,16 +118,12 @@ public class PbEntityListener extends PlayerListener {
 			
 		if ((plugin.isPlayer(player)) && (event.getItem().getType() == Material.BOW)){
 			
-			boolean inzone = false;
-			
-			if(arrowinzone(player.getLocation()) != -1){
-				inzone = true;
-			}
+			boolean inzone = arrowinzone(player.getLocation());
 			
 			if(event.getAction()==Action.RIGHT_CLICK_AIR && inzone ){
 				if (player.getInventory().contains(Material.ARROW)){
-					event.setCancelled(true);
-					crateOddArrow(player);
+					//event.setCancelled(true);
+					//crateOddArrow(player);
 					//player.sendMessage("Arrow shot!");
 				}else{
 					if(player.hasPermission("oddarrow.oa.allammo")){

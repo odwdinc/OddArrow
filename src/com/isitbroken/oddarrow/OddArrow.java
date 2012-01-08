@@ -15,6 +15,7 @@ import java.util.logging.Logger;
 
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.block.Block;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Arrow;
@@ -36,14 +37,20 @@ public class OddArrow extends JavaPlugin{
 	public HashMap<Player, Boolean > oddArrowEnabledHash = new HashMap<Player, Boolean>();
 	public HashMap<Player, Integer> oddArrowModeHash = new HashMap<Player, Integer>();
 	public HashMap<Player, Material> arrowMaterialHash = new HashMap<Player, Material>();
+	
 	public HashMap<Location, Double > oddArrowZoneSize = new HashMap<Location, Double>();
+	public HashMap<Location, Double > PoddArrowZoneSize = new HashMap<Location, Double>();
+	
+	public HashMap<Block, Material> LightMaterialHash = new HashMap<Block, Material>();
+	
 	ArrayList<Location> oddLocation = new ArrayList<Location>();
-
+	ArrayList<Location> PoddLocation = new ArrayList<Location>();
 
 	public final Logger logger = Logger.getLogger("Minecraft");
 
 	PbEntityListener playerListener =  new PbEntityListener(this);
-
+	PbBlockListener blockListener =  new PbBlockListener(this);
+	
 	static String mainDirectory = "plugins/OddArrow"; //sets the main directory for easy reference
 	static File OddArrowdat = new File(mainDirectory + File.separator + "OddArrow.properties");
 	static Properties prop = new Properties(); //creates a new properties file
@@ -52,9 +59,14 @@ public class OddArrow extends JavaPlugin{
 	public int BlastSize;
 	PluginDescriptionFile pdfFile;
 	public InventoryManger inventorymanger;
+	boolean UseInventory;
+	Material BridgeMaterial = Material.getMaterial(5);
+	boolean UseProtectedLocations;
+	
 
 	@Override
 	public void onDisable() {
+		
 		this.logger.info("[OddArrow] is Disabled!");
 	}
 
@@ -66,7 +78,8 @@ public class OddArrow extends JavaPlugin{
 		pm.registerEvent(Type.PLAYER_INTERACT, playerListener, Priority.Normal, this);
 		pm.registerEvent(Type.PLAYER_MOVE, playerListener, Priority.Normal, this);
 		pm.registerEvent(Type.PROJECTILE_HIT, Arrowtask, Priority.Normal, this);
-
+		pm.registerEvent(Type.BLOCK_BREAK, blockListener, Priority.Normal, this);
+		
 		pdfFile = this.getDescription();
 		plugin = this;
 		setupCommands();
@@ -92,13 +105,71 @@ public class OddArrow extends JavaPlugin{
 				prop.load(in); //loads the file contents of zones ("in" which references to the zones file) from the input stream.
 				BlastSize = Integer.parseInt(prop.getProperty("BlastSize")); //explained below
 				this.logger.info( "["+pdfFile.getName() + "] BlastSize " + BlastSize);
-				
-				if(prop.getProperty("UseLocations").equalsIgnoreCase("true")){
-					UseLocation = true;
-					this.logger.info("["+pdfFile.getName() + "] Useing Locations");
+				if(prop.containsKey("UseLocations")){
+					if(prop.getProperty("UseLocations").equalsIgnoreCase("true")){
+						UseLocation = true;
+						this.logger.info("["+pdfFile.getName() + "] Useing Locations");
+					}else{
+						this.logger.info("["+pdfFile.getName() + "] Not Useing Locations");
+					}
 				}else{
-					this.logger.info("["+pdfFile.getName() + "] Not Useing Locations");
+					this.logger.info("Warrning ["+pdfFile.getName() + "] No key UseLocations");
+
 				}
+				
+				if(prop.containsKey("UseProtectedLocations")){
+					if(prop.getProperty("UseProtectedLocations").equalsIgnoreCase("true")){
+						UseProtectedLocations = true;
+						this.logger.info("["+pdfFile.getName() + "] Useing Protected Locations");
+					}else{
+						this.logger.info("["+pdfFile.getName() + "] Not Useing Protected Locations");
+					}
+				}else{
+					this.logger.info("Warrning ["+pdfFile.getName() + "] No key UseProtectedLocations");
+
+				}
+				
+				if(prop.containsKey("UseInventory")){
+					if(prop.getProperty("UseInventory").equalsIgnoreCase("true")){
+						UseInventory = true;
+						this.logger.info("["+pdfFile.getName() + "] Useing Inventory");
+					}else{
+						this.logger.info("["+pdfFile.getName() + "] Not Useing Inventory");
+					}
+				}else{
+					this.logger.info("Warrning ["+pdfFile.getName() + "] No key UseInventory");
+				}
+				
+				if(prop.containsKey("BridgeMaterial")){
+					if(UseInventory){
+						this.logger.info("["+pdfFile.getName() + "] Bridge Material Useing Inventory");
+					}else{
+						if(!prop.getProperty("BridgeMaterial").isEmpty()){
+							String BridgeMaterialname = prop.getProperty("BridgeMaterial");
+							try
+							{
+								BridgeMaterial = Material.getMaterial(Integer.parseInt(BridgeMaterialname));
+							}
+							catch(NumberFormatException nfe)
+							{
+								BridgeMaterial = Material.getMaterial(BridgeMaterialname);
+							}
+							if(BridgeMaterial != null){
+								this.logger.info("["+pdfFile.getName() + "] Bridge Material is "+BridgeMaterial.name());
+							}else{
+								this.logger.info("Warrning ["+pdfFile.getName() + "]  Bridge Material not found " + BridgeMaterialname);
+								this.logger.info("["+pdfFile.getName() + "] Bridge Material Useing Stone");
+								BridgeMaterial = Material.STONE;
+							}
+						}else{
+							this.logger.info("["+pdfFile.getName() + "] Bridge Material Useing "+BridgeMaterial.name());
+						}
+					}
+				}else{
+					this.logger.info("Warrning ["+pdfFile.getName() + "] No key BridgeMaterial");
+				}
+				
+				
 				this.logger.info("["+pdfFile.getName() + "] Loaded Property");
 
 			} catch (FileNotFoundException e) {
@@ -114,6 +185,9 @@ public class OddArrow extends JavaPlugin{
 				FileOutputStream out = new FileOutputStream(OddArrowdat); //creates a new output steam needed to write to the file
 				prop.put("BlastSize", "5"); //put the property ZoneCount with a value of 0 into the properties file, this will show up as ZoneCount=0 in the properties file.
 				prop.put("UseLocations", "False");
+				prop.put("UseProtectedLocations", "False");
+				prop.put("UseInventory", "False");
+				prop.put("BridgeMaterial", "");
 				prop.store(out, "Edit this config!"); //You need this line! It stores what you just put into the file and adds a comment.
 				out.flush();  //Explained below in tutorial
 				out.close(); //Closes the output stream as it is not needed anymore.'
@@ -162,14 +236,14 @@ public class OddArrow extends JavaPlugin{
 	public void PlayerMode(Player ThisPlayer, Integer Mode){
 		switch (Mode) {
 		case 0:		
-			if(ThisPlayer.hasPermission("oddarrow.oa.rapid")) {
+			if(ThisPlayer.hasPermission("oddarrow.oam.rapid")) {
 				playerListener.setArrowMode(ThisPlayer, 0);
 				ThisPlayer.sendMessage("["+pdfFile.getName() + "] Rapid Fire");
 				break;
 			}
 
 		case 1:	
-			if(ThisPlayer.hasPermission("oddarrow.oa.remote")) {
+			if(ThisPlayer.hasPermission("oddarrow.oam.remote")) {
 				playerListener.setArrowMode(ThisPlayer, 1);
 				ThisPlayer.sendMessage("["+pdfFile.getName() + "] Remote Explosions");
 				ThisPlayer.sendMessage("               Type /boom to detonate.");
@@ -177,59 +251,59 @@ public class OddArrow extends JavaPlugin{
 			}
 
 		case 2:	
-			if(ThisPlayer.hasPermission("oddarrow.oa.light")){
+			if(ThisPlayer.hasPermission("oddarrow.oam.light")){
 				playerListener.setArrowMode(ThisPlayer, 2);
 				ThisPlayer.sendMessage("["+pdfFile.getName() + "] Create Light");
 				break;
 			}
 		case 3:	
-			if(ThisPlayer.hasPermission("oddarrow.oa.replace")) {
+			if(ThisPlayer.hasPermission("oddarrow.oam.replace")) {
 				playerListener.setArrowMode(ThisPlayer, 3);
 				ThisPlayer.sendMessage("["+pdfFile.getName() + "] Replace With " + playerListener.getArrowMaterial(ThisPlayer) );
 				ThisPlayer.sendMessage("               Type /oa replace <Block> to Change");
 				break;
 			}	
 		case 4:	
-			if(ThisPlayer.hasPermission("oddarrow.oa.create")) {
+			if(ThisPlayer.hasPermission("oddarrow.oam.create")) {
 				playerListener.setArrowMode(ThisPlayer, 4);
 				ThisPlayer.sendMessage("["+pdfFile.getName() + "] Create " + playerListener.getArrowMaterial(ThisPlayer) );
 				ThisPlayer.sendMessage("               Type /oa create <Block> to Change");
 				break;
 			}
 		case 5:	
-			if(ThisPlayer.hasPermission("oddarrow.oa.topsoil")) {
+			if(ThisPlayer.hasPermission("oddarrow.oam.topsoil")) {
 				playerListener.setArrowMode(ThisPlayer, 5);
 				ThisPlayer.sendMessage("["+pdfFile.getName() + "] Topsoil removal");
 				break;
 			}
 
 		case 6:	
-			if(ThisPlayer.hasPermission("oddarrow.oa.lightning")) {
+			if(ThisPlayer.hasPermission("oddarrow.oam.lightning")) {
 				playerListener.setArrowMode(ThisPlayer, 6);
 				ThisPlayer.sendMessage("["+pdfFile.getName() + "] Lightning strike");
 				break;
 			}
 
 		case 7:	
-			if(ThisPlayer.hasPermission("oddarrow.oa.bridges")) {
+			if(ThisPlayer.hasPermission("oddarrow.oam.bridges")) {
 				playerListener.setArrowMode(ThisPlayer, 7);
 				ThisPlayer.sendMessage("["+pdfFile.getName() + "] Bridges!");
 				break;
 			}
 		case 8:	
-			if(ThisPlayer.hasPermission("oddarrow.oa.mobs")) {
+			if(ThisPlayer.hasPermission("oddarrow.oam.mobs")) {
 				playerListener.setArrowMode(ThisPlayer, 8);
 				ThisPlayer.sendMessage("["+pdfFile.getName() + "] Mobs!");
 				break;
 			}
 		case 9:	
-			if(ThisPlayer.hasPermission("oddarrow.oa.mtape")) {
+			if(ThisPlayer.hasPermission("oddarrow.oam.mtape")) {
 				playerListener.setArrowMode(ThisPlayer, 9);
 				ThisPlayer.sendMessage("["+pdfFile.getName() + "] Measuring Tape!");
 				break;
 			}
 		case 10:	
-			if(ThisPlayer.hasPermission("oddarrow.oa.chests")) {
+			if(ThisPlayer.hasPermission("oddarrow.oam.chests")) {
 				playerListener.setArrowMode(ThisPlayer, 10);
 				ThisPlayer.sendMessage("["+pdfFile.getName() + "] Chests!");
 				break;
@@ -250,7 +324,7 @@ public class OddArrow extends JavaPlugin{
 			Player ThisPlayer = (Player)sender;
 			if(ThisPlayer.hasPermission("oddarrow.Enabled")){
 				if (isPlayer(ThisPlayer)){
-					if (commandLable.equalsIgnoreCase("Boom") && ThisPlayer.hasPermission("oddarrow.oa.boom")){
+					if (commandLable.equalsIgnoreCase("Boom") && ThisPlayer.hasPermission("oddarrow.oam.boom")){
 						Arrowtask.RemoteExplosions(ThisPlayer);
 						return true;
 					}
@@ -286,6 +360,8 @@ public class OddArrow extends JavaPlugin{
 								ThisPlayer.sendMessage(" ");
 
 								ThisPlayer.sendMessage("Arrow in list = "+ Output);
+								ThisPlayer.sendMessage("LightMaterialHash = "+ LightMaterialHash.toString());
+								
 								return true;
 							}
 
@@ -297,7 +373,15 @@ public class OddArrow extends JavaPlugin{
 								sender.sendMessage("["+pdfFile.getName() + "] New location set @ your Location Size:"+Integer.parseInt(args[1]));
 								return true;
 
-							}else if( playerListener.getArrowMode(ThisPlayer) == 3 || playerListener.getArrowMode(ThisPlayer) == 4) {
+							}if(args[0].equalsIgnoreCase("Ploc") && ThisPlayer.hasPermission("oddarrow.ploc") && UseProtectedLocations){
+								Location thisloction = ThisPlayer.getLocation();
+								PoddLocation.add(thisloction);
+								oddArrowZoneSize.put(thisloction,(double) Integer.parseInt(args[1]));
+								sender.sendMessage("["+pdfFile.getName() + "] New location set @ your Location Size:"+Integer.parseInt(args[1]));
+								return true;
+
+							}
+							else if( playerListener.getArrowMode(ThisPlayer) == 3 || playerListener.getArrowMode(ThisPlayer) == 4) {
 								Material ArrowMaterial;
 								try
 								{
@@ -309,7 +393,7 @@ public class OddArrow extends JavaPlugin{
 								}
 
 								try{
-									if(ThisPlayer.hasPermission("oddarrow.oa.Material."+ArrowMaterial.toString())){
+									if(ThisPlayer.hasPermission("oddarrow.oam.Material."+ArrowMaterial.toString())){
 										sender.sendMessage("[OddArrow] [ArrowMaterial "+ArrowMaterial.toString()+"]");
 										playerListener.setArrowMaterial(ThisPlayer,ArrowMaterial);
 										return true;
