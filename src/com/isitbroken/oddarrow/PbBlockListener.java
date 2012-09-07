@@ -2,10 +2,11 @@ package com.isitbroken.oddarrow;
 
 import org.bukkit.Material;
 import org.bukkit.block.Block;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
-import org.bukkit.event.block.BlockListener;
 
-public class PbBlockListener extends BlockListener {
+public class PbBlockListener implements Listener {
 
 	private OddArrow plugin;
 
@@ -13,7 +14,7 @@ public class PbBlockListener extends BlockListener {
 		plugin = oddArrow;
 		
 	}
-	@Override
+	@EventHandler
 	public void onBlockBreak(BlockBreakEvent event){
 		Block Location = event.getBlock();
 		//event.getPlayer().sendMessage(Location.toString());
@@ -22,7 +23,7 @@ public class PbBlockListener extends BlockListener {
 			Material setmet = plugin.LightMaterialHash.get(Location);
 			event.getBlock().setType(setmet);
 			plugin.LightMaterialHash.remove(Location);
-			//event.getPlayer().sendMessage("Created [] Replaced with "+setmet.name());
+			event.getPlayer().sendMessage("Created [] Replaced with "+setmet.name());
 		}
 	}
 }

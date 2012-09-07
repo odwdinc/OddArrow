@@ -6,14 +6,15 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.entity.Arrow;
 import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEvent;
-import org.bukkit.event.player.PlayerListener;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 
 
-public class PbEntityListener extends PlayerListener {
+public class PbEntityListener implements Listener {
 	
 	public HashMap<Player, Integer> oddArrowModeHash = new HashMap<Player, Integer>();
 	public HashMap<Player, Material> arrowMaterialHash = new HashMap<Player, Material>();
@@ -71,12 +72,12 @@ public class PbEntityListener extends PlayerListener {
 	
 	public void crateOddArrow(Player player)	{
 		try{
-		Arrow arrow = player.shootArrow();
+		Arrow arrow = player.launchProjectile(Arrow.class);
 		plugin.Arrowtask.arrows.add(arrow);
 		plugin.Arrowtask.arrowMode.put(arrow, getArrowMode(player));
 		plugin.Arrowtask.arrowMaterial.put(arrow, getArrowMaterial(player));
 		} catch (ArrayIndexOutOfBoundsException e){
-			player.shootArrow();
+			player. launchProjectile(Arrow.class);
 		}
 		
 	}
@@ -112,6 +113,7 @@ public class PbEntityListener extends PlayerListener {
 		
 	}
 	
+	@EventHandler
 	public void onPlayerInteract (PlayerInteractEvent event)
 	{
 		Player player=event.getPlayer();
@@ -148,6 +150,8 @@ public class PbEntityListener extends PlayerListener {
 			}else{
 				//player.sendMessage("There are " +plugin.oddLocation.size() + " OddZones in game");
 			}
+		}else{
+			//player.sendMessage("Not using bow");
 		}
 
 	}

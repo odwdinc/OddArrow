@@ -11,19 +11,20 @@ import org.bukkit.block.Block;
 import org.bukkit.block.Chest;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Arrow;
-import org.bukkit.entity.CreatureType;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
-import org.bukkit.event.entity.EntityListener;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
 import org.bukkit.event.entity.ProjectileHitEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 
-public class ArrowChecker extends EntityListener{
+public class ArrowChecker implements Listener{
 	private OddArrow plugin;
 	
-	public ArrowChecker(OddArrow instantness) {
-		plugin =  instantness;								//local instantness of OddArrow plugin.
+	public ArrowChecker(OddArrow oddArrow) {
+		plugin = oddArrow;
 	}
 
 	HashMap<Arrow,Integer> arrowMode = new HashMap<Arrow,Integer>();
@@ -132,10 +133,11 @@ public class ArrowChecker extends EntityListener{
 		case 8://Mobs
 			if(arrow.getWorld().getAllowMonsters()){
 				arrow.getWorld().playEffect(arrow.getLocation(), Effect.SMOKE, 10);
-				arrow.getWorld().spawnCreature(arrow.getLocation(),CreatureType.SKELETON);
+				
+				arrow.getWorld().spawnEntity(arrow.getLocation(), EntityType.SKELETON);
 			}else if(arrow.getWorld().getAllowAnimals()){
 				arrow.getWorld().playEffect(arrow.getLocation(), Effect.SMOKE, 10);
-				arrow.getWorld().spawnCreature(arrow.getLocation(),CreatureType.COW);
+				arrow.getWorld().spawnEntity(arrow.getLocation(),EntityType.COW);
 			}else{
 				arrow.getWorld().playEffect(arrow.getLocation(), Effect.SMOKE, 10);
 			}
@@ -257,6 +259,7 @@ public class ArrowChecker extends EntityListener{
 		return true;
 	}
 	
+	@EventHandler
 	public void onProjectileHit(ProjectileHitEvent event) {
 				
 		if(event.getEntity() instanceof Arrow){

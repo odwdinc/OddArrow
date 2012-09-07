@@ -20,8 +20,6 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Arrow;
 import org.bukkit.entity.Player;
-import org.bukkit.event.Event.Priority;
-import org.bukkit.event.Event.Type;
 
 import org.bukkit.plugin.PluginDescriptionFile;
 import org.bukkit.plugin.PluginManager;
@@ -74,10 +72,9 @@ public class OddArrow extends JavaPlugin{
 	public void onEnable() {
 		new File(mainDirectory).mkdir();
 		PluginManager pm = getServer().getPluginManager();		
-		pm.registerEvent(Type.PLAYER_INTERACT, playerListener, Priority.Normal, this);
-		pm.registerEvent(Type.PLAYER_MOVE, playerListener, Priority.Normal, this);
-		pm.registerEvent(Type.PROJECTILE_HIT, Arrowtask, Priority.Normal, this);
-		pm.registerEvent(Type.BLOCK_BREAK, blockListener, Priority.Normal, this);		
+		pm.registerEvents(playerListener, this);
+		pm.registerEvents(Arrowtask, this);
+		pm.registerEvents(blockListener, this);		
 		pdfFile = this.getDescription();
 		plugin = this;
 		setupCommands();
